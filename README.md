@@ -4,6 +4,7 @@ This project is designed to test various logic gates using Verilog. Verilog is a
 
 ## Getting Started
 
+Download the Icarus, the Verilog compiler and simulator, from [here](https://bleyer.org/icarus/). You will need to install this in order to run the tests.
 To run the tests, simply type `./test.sh` in your terminal. This will compile the Verilog code and run the simulation.
 
 ## Understanding Verilog

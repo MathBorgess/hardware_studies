@@ -1,11 +1,8 @@
 module gate (
     input wire a,
-    input wire b,
-    input wire c,
-    input wire d,
-    output reg y
+    output wire b,
+    output wire c
 );
-    always @(a or b or c or d) begin
-      y = a & b & c & d;
-    end
+  assign #3 b = a & c;  
+  assign #2 c = !b;
 endmodule

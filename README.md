@@ -1,6 +1,6 @@
-# Verilog Gate Testing Project
+# Verilog Project
 
-This project is designed to test various logic gates using Verilog. Verilog is a hardware description language used to model electronic systems. In this project, we will be testing the functionality of AND, OR, and NOT gates.
+This project is designed to test various logic gates using Verilog. Verilog is a hardware description language used to model electronic systems.
 
 ## Getting Started
 
@@ -10,22 +10,22 @@ To run the tests, simply type `./test.sh` in your terminal. This will compile th
 ## Understanding Verilog
 
 Verilog is a hardware description language used to model electronic systems. It allows designers to describe the behavior of a circuit in a high-level language, which can then be compiled into a low-level representation that can be used to program an FPGA or ASIC.
+Futhermore, verilog is an event drive language, so it is important to understand how events work. An event is a change in the value of a signal. For example, if the value of a signal changes from 0 to 1, this is an event. Events are scheduled to occur at a specific time. When the simulation time reaches the time of an event, the event is executed. The event may cause other events to be scheduled. This continues until there are no more events to execute. The simulation time then advances to the time of the next event. This process continues until the simulation is complete. 
+Processes can be instacied in two ways: combinational and sequential. Combinational processes are used to describe combinational logic, which is a logic that is dependent only on the current values of the inputs. Sequential processes are used to describe sequential logic, which is a logic that is dependent on the current values of the inputs and the previous values of the inputs.
+Sequencial -> Syncronous : var_net <= var_net + 1
+Combinational -> Asyncronous : var_net = var_net + 1
 
-## Testing Gates
 
-In this project, we will be testing the functionality of AND, OR, and NOT gates. These gates are fundamental building blocks of digital circuits, and are used to perform logical operations on binary data.
+## Structure and behavior of modules
 
-### AND Gate
-
-The AND gate takes two inputs and produces an output that is high (1) only if both inputs are high. Otherwise, the output is low (0).
-
-### OR Gate
-
-The OR gate takes two inputs and produces an output that is high (1) if either input is high. If both inputs are low, the output is low (0).
-
-### NOT Gate
-
-The NOT gate takes a single input and produces an output that is the opposite of the input. If the input is high (1), the output is low (0), and vice versa.
+A module can have behavior code, which is code that describes the behavior of the module. Example:
+```verilog Making a register a, that is updated with a delay of 2 times everytime that b or c changes
+assign #2 a = b & c;
+```
+``` verilog Calling a external module
+`include "and_gate.sv"
+and_gate and1(.a(a), .b(b), .y(y));
+```
 
 ## Contributing
 

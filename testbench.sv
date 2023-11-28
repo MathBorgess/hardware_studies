@@ -1,32 +1,36 @@
 `timescale 1ns/1ps
 
 `include "sys_design.sv"
+module tb_gate;
 
-module gate_tb;
-    // Inputs
-    reg a, b, c, d;
-    // Output
-    reg [3:0] subsets_iten = 0;
-    wire y;
+  // Inputs
+  reg a, b, c;
 
-    gate uut (
-        .a(a),
-        .b(b),
-        .c(c),
-        .d(d),
-        .y(y)
-    );
+  // Instantiate the gate module
+  gate uut (
+    .a(a),
+    .b(b),
+    .c(c)
+  );
 
-    initial begin
-        $display("a \t b \t c \t d | \t y \n");
-        for (real count = 0; count < 16; count = count + 1) begin
-            a = subsets_iten[3];
-            b = subsets_iten[2];
-            c = subsets_iten[1];
-            d = subsets_iten[0];
-            #1; $display("%b \t %b \t %b \t %b | \t %b", a, b, c, d, y);
-            subsets_iten = subsets_iten + 1;
-        end
-        $finish; // End the simulation
-    end
+  // Initial block for testbench
+  initial begin
+    // Open a VCD file for dumping simulation results
+    $dumpfile("gate_simulation.vcd");
+
+    // Dump all signals
+    $dumpvars(0, tb_gate);
+
+    // Initialize inputs
+    a = 0;
+    b = 0;
+    c = 1;
+
+    // Apply test stimulus
+    #10 a = 1;
+
+    // Finish simulation
+    #10 $finish;
+  end
+
 endmodule

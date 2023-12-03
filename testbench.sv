@@ -2,32 +2,21 @@
 
 `include "sys_design.sv"
 module tb_gate;
+  reg [11:0] bits;
+  wire [4:0] count;
 
-  // Inputs
-  reg a, b, c;
-
-  // Instantiate the gate module
-  gate uut (
-    .a(a),
-    .b(b),
-    .c(c)
+  LUT_12bit_1s uut (
+    .bits(bits),
+    .count(count)
   );
-
-  // Initial block for testbench
   initial begin
-    // Open a VCD file for dumping simulation results
     $dumpfile("gate_simulation.vcd");
 
-    // Dump all signals
     $dumpvars(0, tb_gate);
 
-    // Initialize inputs
-    a = 0;
-    b = 0;
-    c = 1;
-
-    // Apply test stimulus
-    #10 a = 1;
+    for (bits = 0; bits <= 10; bits = bits + 1) begin
+      #2;
+    end
 
     // Finish simulation
     #10 $finish;

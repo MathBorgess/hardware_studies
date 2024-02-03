@@ -1,5 +1,7 @@
 `timescale 1ns/1ps
 
+`include "./digital_system_lessons/P2_files/mux8-1.v"
+
 module tb_gate;
   reg [2:0] Sel;
   reg [7:0] A;

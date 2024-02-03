@@ -3,7 +3,7 @@ module mux8_1cond (
     input wire [7:0] A,
     output reg F
 );
-always @* begin
+always @(*) begin
 case (Sel)
     3'b000: F = A[0];
     3'b001: F = A[1];

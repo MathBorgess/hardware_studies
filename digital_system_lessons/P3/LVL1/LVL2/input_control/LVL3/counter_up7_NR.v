@@ -1,8 +1,5 @@
-// NR -> counter is not cyclic, i.e returns to S0 ifoif on posedge 
-
 module counter_nr(
-    input clk,
-    input clear,
+    input clk, clear,
     output reg out
 );  
     reg [2:0] state, next_state;

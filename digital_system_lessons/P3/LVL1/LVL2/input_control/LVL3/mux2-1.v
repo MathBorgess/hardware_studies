@@ -2,7 +2,7 @@
 // pgt: positive going transition
 // enablen = mag_on
 module MUX2_1(
-    input out_count7NR, clk100, enablen,
+    input wire out_count7NR, clk100, enablen,
     output reg pgt_1hz
 );
     always @(*) begin

@@ -1,14 +1,16 @@
+`include "./LVL3/counter_down10.v"
+`include "./LVL3/counter_down6.v"
 
-// Entrada async do load forma de bus, enabled para o magneton, 
 module timer(
-    input wire clk, rst, enabled, load, [3:0] in,
+    input wire clk, rst, enablen, load, [3:0] in,
     output reg [6:0] out_second_unit, out_second_tens, out_minute_unit, out_minute_tens, reg finished 
 );
     reg [3:0] second_unit_load, second_tens_load, minute_unit_load, minute_tens_load;
     reg [3:0] second_unit, second_tens, minute_unit, minute_tens;
     wire rco_L_second_unit, rco_L_second_tens, rco_L_minute_unit, rco_L_minute_tens;
 
-    // mod timer
+    assign enabled = ~enablen;
+
     counter_down10 counter_down10_second_unit (
         .clk(clk),
         .rst(rst),
@@ -46,8 +48,6 @@ module timer(
         .rco_L(rco_L_minute_tens)
     );
 
-    // mod timer
-    // timer_done
     always @(posedge clk) begin
         if (!(rco_L_minute_tens | rco_L_minute_unit | rco_L_second_tens | rco_L_second_unit)) begin
             finished = 1'b1;

@@ -21,15 +21,15 @@ module tb_;
             $dumpfile("tb.vcd");
             $dumpvars(0, tb_);
                 clk_tb = 1'b1;
+                in = 4'b0001;
+                #3 load = 1'b1;
+                #5 in = 4'b0010;
+                #3 load = 1'b0;
                 enablen = 1'b0;
-                rst = 1'b0;
-                #10 rst = 1'b1;
-                load = 1'b0;
-                #10 in = 4'b0010;
                 load = 1'b1;
-                #100 load = 1'b0;
+                #10 load = 1'b0;
 
-        #10000 $finish();        
+        #13000 $finish();        
         end
 
 endmodule

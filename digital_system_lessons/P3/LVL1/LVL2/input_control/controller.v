@@ -1,7 +1,7 @@
-`include "./LVL3/BCD.v"
-`include "./LVL3/counter_up7_NR.v"
-`include "./LVL3/freqdiv100.v"
-`include "./LVL3/mux2-1.v"
+`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/LVL3/BCD.v"
+`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/LVL3/counter_up7_NR.v"
+`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/LVL3/freqdiv100.v"
+`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/LVL3/mux2-1.v"
 
 module input_encoder(
     input wire clk, enablen, [9:0] keypad,

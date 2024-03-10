@@ -1,5 +1,5 @@
-`include "./LVL3/comb_logic.v"
-`include "./LVL3/sr_latch.v"
+`include "./digital_system_lessons/P3/LVL1/LVL2/magnetron/LVL3/comb_logic.v"
+`include "./digital_system_lessons/P3/LVL1/LVL2/magnetron/LVL3/sr_latch.v"
 
 module magnetron (
     input wire startn, stopn, clearn, door_closed, timer_done,

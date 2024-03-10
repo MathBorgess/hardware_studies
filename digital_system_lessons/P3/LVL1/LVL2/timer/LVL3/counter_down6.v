@@ -3,8 +3,10 @@
 //             [...] If a person enters an initial value for seconds that is greater than 59 (i.e., 60 to 99)
 //             the seconds counter should still count down from that value to 00.
 module counter_down6(
-    input wire clk, rst, enabled, load, [3:0] in,
-    output reg [3:0] count, reg rco_L
+    input wire clk, rst, enablen, load, 
+    input [3:0] in,
+    output reg [3:0] count,
+    output reg rco_L
 );
     reg [4:0] state, next_state;
     parameter [4:0] S0 = 4'b0000, S1 = 4'b0001, S2 = 4'b0010, S3 = 4'b0011, S4 = 4'b0100, S5 = 4'b0101;
@@ -16,7 +18,7 @@ module counter_down6(
     end
 
     always @(posedge clk) begin: STATE_MEMORY
-        if (enabled) begin
+        if (!enablen) begin
             state <= next_state;
         end
     end
@@ -40,6 +42,6 @@ module counter_down6(
 
     always @(state) begin: OUTPUT_LOGIC
         count = state;
-        rco_L = !(state == S0);
+        rco_L = !(state != S0);
     end
 endmodule

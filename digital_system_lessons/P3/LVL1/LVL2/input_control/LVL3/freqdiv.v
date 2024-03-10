@@ -6,10 +6,10 @@ module freqdiv100 (
     reg [5:0] count = 6'b000000;
     initial clk100 = 1'b1;
     
-    always@(posedge clk) begin
+    always @(posedge clk) begin
         count = count + 1;
         if(count == 51) begin
-            count = 6'b000000;
+            count = 6'b000001;
             clk100 = ~clk100;
         end
     end
@@ -21,13 +21,13 @@ module freqdiv50M (
     output reg clk50m
 );
     parameter tfm = 25000000;
-    integer count = 0;
+    reg [21:0] count = 0;
     initial clk50m = 1'b1;
     
-    always@(posedge clk) begin
+    always @(posedge clk) begin
         count = count + 1;
         if(count == (tfm+1)) begin
-            count = 0;
+            count = 1;
             clk50m = ~clk50m;
         end
     end

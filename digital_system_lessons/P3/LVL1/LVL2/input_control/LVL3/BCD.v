@@ -1,6 +1,8 @@
 module encoder_BCD (
-    input [9:0] keypad, wire enablen,
-    output reg [3:0] BCD, reg valid_data
+    input wire [9:0] keypad,
+    input wire enablen,
+    output reg [3:0] BCD,
+    output reg valid_data
 );
     initial begin
         valid_data = 1'b0;

@@ -1,5 +1,5 @@
 // clk -> 100hz ; clk100 -> 1hz
-module freqdiv100 (
+module freqdiv (
     input clk, 
     output reg clk100
 );

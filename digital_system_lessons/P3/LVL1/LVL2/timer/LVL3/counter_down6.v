@@ -15,14 +15,10 @@ module counter_down6(
         state = S0;
     end
 
-    always @(load) begin
-        if (load) begin
-            state = in;
-        end
-    end
-
     always @(posedge clk) begin: STATE_MEMORY
-        if (!enablen) begin
+        if (load) begin
+            state <= in;
+        end else if (!enablen) begin
             state <= next_state;
         end
     end

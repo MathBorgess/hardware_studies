@@ -1,5 +1,6 @@
 module counter_nr(
-    input clk, clear,
+    input wire clk, clear,
+    input wire [9:0] keypad,
     output reg out
 );  
     reg [2:0] state, next_state;
@@ -10,7 +11,7 @@ module counter_nr(
         state <= next_state;
     end
 
-    always @(clear) begin
+    always @(keypad) begin
         if(clear) begin
             next_state = S0;
         end

@@ -4,7 +4,7 @@
 `include "./digital_system_lessons/P3/LVL1/LVL2/7-segment/controller.v"
 
 module MWcontroller(
-    input wire clk, enablen, startn, stopn, clearn, door_closed, 
+    input wire clk, startn, stopn, clearn, door_closed, 
     input wire [9:0] keypad,
     output reg mag_on,
     output reg [6:0] sec_ones_segs, sec_tens_segs, min_ones_segs, min_tens_segs
@@ -16,12 +16,12 @@ module MWcontroller(
     wire [6:0] display_second_unit, display_second_tens, display_minute_unit, display_minute_tens;
 
     input_encoder input_encoder_inst (
-        .clk(clk), .enablen(enablen), .keypad(keypad),
+        .clk(clk), .enablen(mag_on), .keypad(keypad),
         .load(load), .pgt_1hz(pgt_1hz), .digit(digit)
     );
 
     timer timer_inst (
-        .clk(pgt_1hz), .rst(clearn), .enablen(enablen), .load(load), .in(digit),
+        .clk(pgt_1hz), .rst(clearn), .enablen(!mag_on), .load(load), .in(digit),
         .out_second_unit(out_second_unit), .out_second_tens(out_second_tens),
         .out_minute_unit(out_minute_unit), .out_minute_tens(out_minute_tens),
         .finished(timer_done)

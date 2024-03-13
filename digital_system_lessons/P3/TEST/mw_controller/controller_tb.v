@@ -2,13 +2,13 @@
 `include "./digital_system_lessons/P3/LVL1/MWcontroller.v"
 
 module tb_;
-    reg clk_tb, enablen, startn, stopn, clearn, door_closed;
+    reg clk_tb, startn, stopn, clearn, door_closed;
     reg [9:0] keypad;
     wire [6:0] sec_ones_segs, sec_tens_segs, min_ones_segs, min_tens_segs;
     wire mag_on;
 
     MWcontroller dut(
-    .clk(clk_tb), .enablen(enablen), .keypad(keypad),
+    .clk(clk_tb), .keypad(keypad),
     .startn(startn), .stopn(stopn), .clearn(clearn), .door_closed(door_closed),
     .mag_on(mag_on),
     .sec_ones_segs(sec_ones_segs), .sec_tens_segs(sec_tens_segs), .min_ones_segs(min_ones_segs), .min_tens_segs(min_tens_segs)
@@ -21,19 +21,26 @@ module tb_;
             $dumpfile("tb.vcd");
             $dumpvars(0, tb_);
                 clk_tb = 1'b1;
+                startn = 1'b1;
+                door_closed = 1'b1;
+                stopn = 1'b1;
+                keypad = 10'b0000000000;
                 clearn = 1'b0;
+
                 #1;
                 clearn = 1'b1;
-                enablen = 1'b0;
                 #1;
-                keypad = 10'b0000000000;
-                #10;
-                keypad = 10'b0000000001;
-                #10;
                 keypad = 10'b0000000010;
-                #10;
+                #100;
+                keypad = 10'b0000000100;
+                #100;
                 startn = 1'b0;
-                #13000;
+                #8000;
+                stopn = 1'b0;
+                #1000;
+                stopn = 1'b1;
+                #4000;
+                
          $finish();        
         end
 

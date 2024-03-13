@@ -27,6 +27,7 @@ freqdiv freqdiv100 (
 counter_nr counter (
     .clk(clk),
     .clear(load),
+    .keypad(keypad),
     .out(counter_out)
 );
 
@@ -39,7 +40,7 @@ MUX2_1 mux2_1 (
 
 always @(*) begin
     digit = bcd_digit;
-    load = load_;
+    load = load_ && !enablen;
     pgt_1hz = tick;
 end
 

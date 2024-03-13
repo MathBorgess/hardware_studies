@@ -40,7 +40,7 @@ MUX2_1 mux2_1 (
 always @(*) begin
     digit = bcd_digit;
     load = load_;
-    pgt_1hz = ~tick;
+    pgt_1hz = tick;
 end
 
 endmodule

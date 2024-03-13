@@ -1,5 +1,5 @@
 module mag_comb_logic (
-    input wire startn, stopn, clearn, door_closed, timer_done
+    input wire startn, stopn, clearn, door_closed, timer_done,
     output reg set, reset
 );
 

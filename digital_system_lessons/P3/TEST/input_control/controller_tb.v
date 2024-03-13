@@ -27,9 +27,9 @@ module tb_;
                 #3 enablen = 1'b1;
                 i = 10'b0000000001;
                 for (count = 0; count < 10; count = count+1) begin
-                    #3 enablen = 1'b1;
+                    #3 enablen = 1'b0;
                     keypad = i;
-                    #2 enablen = 1'b0;
+                    #2 enablen = 1'b1;
                     i = i << 1;
                 end
             $finish();

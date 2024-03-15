@@ -4,13 +4,15 @@ module encoder_BCD (
     output reg [3:0] BCD,
     output reg valid_data
 );
+
+    reg [9:0] old_keypad = 10'b0000000000;
     initial begin
         valid_data = 1'b0;
         BCD = 4'b1111;
     end
 
-    always@(keypad)
-        if (!enablen) begin
+    always@(keypad or enablen) begin
+        if (!enablen && old_keypad != keypad) begin
             case (keypad)
                 10'b0000000001: BCD = 4'b0000;
                 10'b0000000010: BCD = 4'b0001;
@@ -28,6 +30,10 @@ module encoder_BCD (
                 valid_data = 1'b1;
             else
                 valid_data = 1'b0;
+            old_keypad = keypad;
+        end else begin
+            valid_data = 1'b0;
         end
+    end
 
 endmodule

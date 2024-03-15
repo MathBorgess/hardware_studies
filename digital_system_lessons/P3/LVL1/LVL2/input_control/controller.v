@@ -11,6 +11,7 @@ module input_encoder(
 );
 wire counter_out, clk100, tick, load_;
 wire [3:0] bcd_digit;
+reg [9:0] old_keypad = 10'b0000000000;
 
 encoder_BCD bcd (
     .keypad(keypad),

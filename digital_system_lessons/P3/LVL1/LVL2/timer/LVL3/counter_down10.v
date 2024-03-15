@@ -15,7 +15,7 @@ module counter_down10(
     always @(clk or rst) begin: STATE_MEMORY
     if (!rst) begin
         state = S0;
-    end else if (clk) begin
+    end else if (clk ^ rst) begin
             if (load) begin
                 state <= in;
             end else if (!enablen) begin

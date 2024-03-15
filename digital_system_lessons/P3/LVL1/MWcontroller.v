@@ -35,7 +35,7 @@ module MWcontroller(
     SevenSegmentsDecoder_4digits seven_segment_inst (
         .second_unit(out_second_unit), .second_tens(out_second_tens),
         .minute_unit(out_minute_unit), .minute_tens(out_minute_tens),
-        .out_second_unit(display_second_tens), .out_second_tens(display_second_tens),
+        .out_second_unit(display_second_units), .out_second_tens(display_second_tens),
         .out_minute_unit(display_minute_unit), .out_minute_tens(display_minute_tens)
     );
 

@@ -16,20 +16,18 @@ module counter_down6(
         state = S0;
     end
 
-    always @(posedge clk) begin: STATE_MEMORY
-        if (load) begin
-            state <= in;
-        end else if (!enablen) begin
-            state <= next_state;
+    always @(clk or rst) begin: STATE_MEMORY
+        if (!rst) begin
+            state = S0;
+        end else if (clk) begin
+            if (load) begin
+                state <= in;
+            end else if (!enablen) begin
+                state <= next_state;
+            end
         end
     end
 
-    always @(rst) begin: RESET_ASYNC
-        if (!rst) begin
-            state = S0;
-        end
-    end
-    
     always @(state) begin: NEXT_STATE_LOGIC
         case (state)
             S0: next_state = next_count_state == S0 ? S0 : S5;
@@ -44,10 +42,8 @@ module counter_down6(
             S8: next_state = S7;
             S9: next_state = S8;
         endcase
-    end
-
-    always @(state) begin: OUTPUT_LOGIC
         count = state;
         rco_L = !(state == S0 && next_count_state != S0);
     end
+
 endmodule

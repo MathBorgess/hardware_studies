@@ -1,4 +1,4 @@
-`timescale 1ms/1ms
+`timescale 1ns/1ns
 `include "./digital_system_lessons/P3/LVL1/MWcontroller.v"
 
 module tb_;
@@ -13,7 +13,7 @@ module tb_;
     .mag_on(mag_on),
     .sec_ones_segs(sec_ones_segs), .sec_tens_segs(sec_tens_segs), .min_ones_segs(min_ones_segs), .min_tens_segs(min_tens_segs)
 );
-    localparam clk_period = 10;
+    localparam clk_period = 50;
     always #(clk_period/2) clk_tb=~clk_tb;
 
     initial
@@ -35,7 +35,7 @@ module tb_;
                 keypad = 10'b0000000100;
                 #100;
                 startn = 1'b0;
-                #8000;
+                #80000000;
                 stopn = 1'b0;
                 #1000;
                 stopn = 1'b1;

@@ -18,17 +18,17 @@ endmodule
 // clk -> 50Mhz ; clk50m -> 1hz
 module freqdiv50M (
     input clk, 
-    output reg clk50m
+    output reg clk100
 );
     parameter tfm = 25000000;
-    reg [21:0] count = 0;
-    initial clk50m = 1'b1;
+    reg [24:0] count = 0;
+    initial clk100 = 1'b1;
     
     always @(posedge clk) begin
         count = count + 1;
         if(count == (tfm+1)) begin
             count = 1;
-            clk50m = ~clk50m;
+            clk100 = ~clk100;
         end
     end
 endmodule

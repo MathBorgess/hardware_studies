@@ -20,7 +20,7 @@ encoder_BCD bcd (
     .valid_data(load_)
 );
 
-freqdiv freqdiv100 (
+freqdiv50M freqdiv100 (
     .clk(clk),
     .clk100(clk100)
 );

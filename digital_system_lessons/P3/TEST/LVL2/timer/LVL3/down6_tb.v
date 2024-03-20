@@ -29,31 +29,31 @@ always #(CLK_PERIOD/2) clk=~clk;
 
 
         // case 0: in = 4'bxxxx -> state = S0
-        clk = 0;
+        clk = 1;
         rst = 1;
         enablen = 0;
         load = 0;
         next_count_state = 4'b0000;
 
         // case 1: n>5 as in, no rco_L
-        #50 in = 4'b1001;
-        #30 load = 1;
-        #30 load = 0; 
+        in = 4'b1001;
+        #3 load = 1;
+        #1 load = 0; 
 
         // case 2: std, no rco_L
         #100 in = 4'b0101;
-        #30 load = 1;
-        #30 load = 0;
+        #3 load = 1;
+        #3 load = 0;
 
         // case 3: rco_L = 0
         #60 in = 4'b0111;
-        #30 load = 1; next_count_state = 4'b1001;
-        #30 load = 0; 
+        #3 load = 1; next_count_state = 4'b1001;
+        #1 load = 0; 
 
         // case 4: test S0 -> S5 and rco_L = 0  
         #40 in = 4'b0001;
-        #30 load = 1; 
-        #30 load = 0;
+        #3 load = 1; 
+        #3 load = 0;
 
         #100 $finish;
     end

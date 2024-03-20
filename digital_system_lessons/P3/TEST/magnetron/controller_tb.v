@@ -1,5 +1,5 @@
 `timescale 1ms/1ms
-`include "./digital_system_lessons/P3/LVL1/LVL2/magnetron/controller.v"
+`include "./LVL1/LVL2/magnetron/controller.v"
 
 module tb_;
     reg startn, stopn, clearn, door_closed, timer_done;

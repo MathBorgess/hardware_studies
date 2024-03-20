@@ -1,5 +1,5 @@
 `timescale 1ms/1ms
-`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/controller.v"
+`include "./LVL1/LVL2/input_control/controller.v"
 
 module tb_;
     reg clk_tb, enablen;

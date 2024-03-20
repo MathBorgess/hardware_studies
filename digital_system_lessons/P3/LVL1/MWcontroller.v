@@ -1,7 +1,7 @@
-`include "./digital_system_lessons/P3/LVL1/LVL2/timer/controller.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/magnetron/controller.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/controller.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/7-segment/controller.v"
+`include "./LVL1/LVL2/timer/controller.v"
+`include "./LVL1/LVL2/magnetron/controller.v"
+`include "./LVL1/LVL2/input_control/controller.v"
+`include "./LVL1/LVL2/7-segment/controller.v"
 
 module MWcontroller(
     input wire clk, startn, stopn, clearn, door_closed, 

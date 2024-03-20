@@ -1,5 +1,5 @@
 `timescale 1ms/1ms
-`include "./digital_system_lessons/P3/LVL1/MWcontroller.v"
+`include "./LVL1/MWcontroller.v"
 
 module tb_;
     reg clk_tb, startn, stopn, clearn, door_closed;

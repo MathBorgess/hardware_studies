@@ -1,4 +1,4 @@
-`include "./digital_system_lessons/P3/LVL1/LVL2/7-segment/LVL3/7_segments_decoder.v"
+`include "./LVL1/LVL2/7-segment/LVL3/7_segments_decoder.v"
 
 module SevenSegmentsDecoder_4digits(
     input [3:0] second_unit, second_tens, minute_unit, minute_tens,

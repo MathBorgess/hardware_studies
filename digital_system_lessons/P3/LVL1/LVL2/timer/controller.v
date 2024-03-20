@@ -1,5 +1,5 @@
-`include "./digital_system_lessons/P3/LVL1/LVL2/timer/LVL3/counter_down10.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/timer/LVL3/counter_down6.v"
+`include "./LVL1/LVL2/timer/LVL3/counter_down10.v"
+`include "./LVL1/LVL2/timer/LVL3/counter_down6.v"
 
 module timer(
     input wire clk, rst, enablen, load, 

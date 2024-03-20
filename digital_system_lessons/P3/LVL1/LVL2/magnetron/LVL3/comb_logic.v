@@ -4,8 +4,10 @@ module mag_comb_logic (
 );
 
     always @(*) begin
-        set = (~startn) & (stopn) & (~timer_done) & (door_closed);
-        reset = (~stopn) | (~clearn) | (timer_done) | (~door_closed);
+        reset = (~startn) & (stopn) & (~timer_done) & (door_closed);
+        set = (~stopn) | (~clearn) | (~door_closed) | timer_done;
+        // set = (~startn) & (stopn) & (~timer_done) & (door_closed);
+        // reset = (~stopn) | (~clearn) | (timer_done) | (~door_closed);
     end
 
 endmodule

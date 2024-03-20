@@ -1,7 +1,7 @@
-`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/LVL3/BCD.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/LVL3/counter_up7_NR.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/LVL3/freqdiv.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/LVL3/mux2-1.v"
+`include "./LVL3/BCD.v"
+`include "./LVL3/counter_up7_NR.v"
+`include "./LVL3/freqdiv.v"
+`include "./LVL3/mux2-1.v"
 
 module input_encoder(
     input wire clk, enablen,
@@ -9,26 +9,28 @@ module input_encoder(
     output reg load, pgt_1hz,
     output reg [3:0] digit
 );
-wire counter_out, clk100, tick, load_;
+wire counter_out, clk100, clk100_, tick, load_;
+reg keypad_pressed;
 wire [3:0] bcd_digit;
-reg [9:0] old_keypad = 10'b0000000000;
 
 encoder_BCD bcd (
     .keypad(keypad),
     .enablen(enablen),
-    .BCD(bcd_digit),
-    .valid_data(load_)
+    .BCD(bcd_digit)
 );
 
 freqdiv50M freqdiv100 (
     .clk(clk),
     .clk100(clk100)
 );
-
-counter_nr counter (
+freqdiv freqdiv__(
     .clk(clk),
-    .clear(load),
-    .keypad(keypad),
+    .clk100_(clk100_)
+); 
+
+counter_up7_NR counter (
+    .clk(clk100_),
+    .clear(keypad_pressed),
     .out(counter_out)
 );
 
@@ -39,9 +41,16 @@ MUX2_1 mux2_1 (
     .pgt_1hz(tick)
 );
 
+always @(keypad) begin
+        if(keypad == 10'b00000_00000)
+            keypad_pressed <= 0;
+        else
+            keypad_pressed <= 1;
+    end
+
 always @(*) begin
     digit = bcd_digit;
-    load = load_ && !enablen;
+    load = keypad_pressed && !enablen;
     pgt_1hz = tick;
 end
 

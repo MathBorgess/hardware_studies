@@ -1,5 +1,5 @@
-`include "./digital_system_lessons/P3/LVL1/LVL2/timer/LVL3/counter_down10.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/timer/LVL3/counter_down6.v"
+`include "./LVL3/counter_down10.v"
+`include "./LVL3/counter_down6.v"
 
 module timer(
     input wire clk, rst, enablen, load, 
@@ -9,52 +9,53 @@ module timer(
 );
     wire [3:0] second_unit_load, second_tens_load, minute_unit_load, minute_tens_load;
     wire [3:0] second_unit, second_tens, minute_unit, minute_tens;
-    wire rco_L_second_unit, rco_L_second_tens, rco_L_minute_unit, rco_L_minute_tens;
+    wire count_end_second_unit, count_end_second_ten, count_end_minute_unit, count_end_minute_ten;
+    wire tc_second_unit, tc_second_tens, tc_minute_unit, tc_minute_tens;
 
     counter_down10 counter_down10_second_unit (
         .clk(clk),
-        .rst(rst),
-        .enablen(enablen),
+        .clearn(rst),
+        .en(enablen),
         .load(load),
         .in(in),
-        .next_count_state(second_tens),
+        .count_end(count_end_second_unit),
         .count(second_unit),
-        .rco_L(rco_L_second_unit)
+        .tc(tc_second_unit)
     );
     counter_down6 counter_down6_second_tens (
         .clk(clk),
-        .rst(rst),
-        .enablen(rco_L_second_unit),
+        .clearn(rst),
+        .en(tc_second_unit),
         .load(load),
         .in(second_unit),
-        .next_count_state(minute_unit),
+        .count_end(count_end_second_ten),
         .count(second_tens),
-        .rco_L(rco_L_second_tens)
+        .tc(tc_second_tens)
     );
     counter_down10 counter_down10_minutes_unit (
         .clk(clk),
-        .rst(rst),
-        .enablen(rco_L_second_tens),
+        .clearn(rst),
+        .en(tc_second_tens),
         .load(load),
         .in(second_tens),
-        .next_count_state(minute_tens),
+        .count_end(count_end_minute_unit),
         .count(minute_unit),
-        .rco_L(rco_L_minute_unit)
+        .tc(tc_minute_unit)
     );
     counter_down6 counter_down6_minutes_tens (
         .clk(clk),
-        .rst(rst),
-        .enablen(rco_L_minute_unit),
+        .clearn(rst),
+        .en(tc_minute_unit),
         .load(load),
         .in(minute_unit),
         .count(minute_tens),
-        .next_count_state(4'b0000),
-        .rco_L(rco_L_minute_tens)
+        .count_end(count_end_minute_ten),
+        .tc(tc_minute_tens)
     );
     parameter [3:0] S0 = 4'b0000;
 
     always @(*) begin
-        if ( second_unit == S0 && second_tens == S0 && minute_unit == S0 && minute_tens == S0 ) begin
+        if ( count_end_second_unit & count_end_second_ten & count_end_minute_unit & count_end_minute_ten ) begin
             finished = 1'b1;
         end else begin
             finished = 1'b0;

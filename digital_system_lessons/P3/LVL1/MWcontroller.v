@@ -1,7 +1,7 @@
-`include "./digital_system_lessons/P3/LVL1/LVL2/timer/controller.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/magnetron/controller.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/input_control/controller.v"
-`include "./digital_system_lessons/P3/LVL1/LVL2/7-segment/controller.v"
+`include "./LVL2/timer/controller.v"
+`include "./LVL2/magnetron/controller.v"
+`include "./LVL2/input_control/controller.v"
+`include "./LVL2/7-segment/controller.v"
 
 module MWcontroller(
     input wire clk, startn, stopn, clearn, door_closed, 
@@ -9,7 +9,7 @@ module MWcontroller(
     output reg mag_on,
     output reg [6:0] sec_ones_segs, sec_tens_segs, min_ones_segs, min_tens_segs
 );
-    wire load, pgt_1hz, timer_done, counter_out, clk100;
+    wire load, pgt_1hz, timer_done, counter_out;
     wire mag_on_;
     wire [3:0] digit;
     wire [3:0] out_second_unit, out_second_tens, out_minute_unit, out_minute_tens;
@@ -21,7 +21,7 @@ module MWcontroller(
     );
 
     timer timer_inst (
-        .clk(pgt_1hz), .rst(clearn), .enablen(!mag_on), .load(load), .in(digit),
+        .clk(pgt_1hz), .rst(clearn), .enablen(mag_on), .load(load), .in(digit),
         .out_second_unit(out_second_unit), .out_second_tens(out_second_tens),
         .out_minute_unit(out_minute_unit), .out_minute_tens(out_minute_tens),
         .finished(timer_done)
@@ -40,7 +40,7 @@ module MWcontroller(
     );
 
     always @(*) begin
-        mag_on = mag_on_;
+        mag_on = !mag_on_;
         sec_ones_segs = display_second_unit;
         sec_tens_segs = display_second_tens;
         min_ones_segs = display_minute_unit;

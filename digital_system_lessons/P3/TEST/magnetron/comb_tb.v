@@ -2,7 +2,6 @@
 `timescale 1ms/1ms
 
 module mag_comb_logic_tb;
-
     reg startn, stopn, clearn, door_closed, timer_done;
     wire set, reset;
 
@@ -17,6 +16,9 @@ module mag_comb_logic_tb;
     );
 
     initial begin
+        $dumpfile("tb.vcd")
+        $dumpvars(0, mag_comb_logic_tb)
+
         startn = 1'b1;
         stopn = 1'b1;
         clearn = 1'b1;

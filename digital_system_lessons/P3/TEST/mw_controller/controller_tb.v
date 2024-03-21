@@ -22,43 +22,43 @@ module tb_;
             $dumpvars(0, tb_);
 
             // case 1
-            clk_tb = 1'b1;
-            startn = 1'b1;
-            door_closed = 1'b1;
-            stopn = 1'b1;
-            keypad = 10'b0000000000;
-            clearn = 1'b0;
-            #1;
-            clearn = 1'b1;
-            #1;
-            keypad = 10'b0000000010;
-            #100;
-            keypad = 10'b0000000100;
-            #100;
-            startn = 1'b0;
-            #8000;
-            door_closed = 1'b0;
-            #2000
-            door_closed = 1'b1;
-            #3000;
-            stopn = 1'b0;
-            #1000
-            stopn = 1'b1;
-            #1
+            // clk_tb = 1'b1;
+            // startn = 1'b1;
+            // door_closed = 1'b1;
+            // stopn = 1'b1;
+            // keypad = 10'b0000000000;
+            // clearn = 1'b0;
+            // #1;
+            // clearn = 1'b1;
+            // #1;
+            // keypad = 10'b0000000010;
+            // #100;
+            // keypad = 10'b0000000100;
+            // #100;
+            // startn = 1'b0;
+            // #8000;
+            // door_closed = 1'b0;
+            // #2000
+            // door_closed = 1'b1;
+            // #3000;
+            // stopn = 1'b0;
+            // #1000
+            // stopn = 1'b1;
+            // #1
 
             // case 2
             clk_tb = 1'b1;
             startn = 1'b1;
             door_closed = 1'b1;
             stopn = 1'b1;
-            clearn = 1'b0;
             keypad = 10'b0000000000;
-            #1
-            keypad = 10'b0010000000;
+            clearn = 1'b0;
+            #1 clearn = 1'b1;
+            #1 keypad = 10'b0010000000;
             #100
             keypad = 10'b0000000001;
             #100
-            startn = 1'b0; clearn = 1'b1;
+            startn = 1'b0;
             #8000
 
          $finish();        

@@ -37,23 +37,23 @@ always #(CLK_PERIOD/2) clk=~clk;
 
         // case 1: n>5 as in, no rco_L
         in = 4'b1001;
-        #3 load = 1;
-        #1 load = 0; 
+        #30 load = 1;
+        #10 load = 0; 
 
         // case 2: std, no rco_L
         #100 in = 4'b0101;
-        #3 load = 1;
-        #3 load = 0;
+        #30 load = 1;
+        #30 load = 0;
 
         // case 3: rco_L = 0
         #60 in = 4'b0111;
-        #3 load = 1; next_count_state = 4'b1001;
-        #1 load = 0; 
+        #30 load = 1; next_count_state = 4'b1001;
+        #10 load = 0; 
 
         // case 4: test S0 -> S5 and rco_L = 0  
         #40 in = 4'b0001;
-        #3 load = 1; 
-        #3 load = 0;
+        #30 load = 1; 
+        #30 load = 0;
 
         #100 $finish;
     end

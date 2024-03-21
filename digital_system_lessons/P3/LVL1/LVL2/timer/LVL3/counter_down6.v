@@ -9,8 +9,8 @@ module counter_down6(
     output reg rco_L
 );
     reg [3:0] state, next_state;
-    parameter [3:0] S0 = 4'b0000, S1 = 4'b0001, S2 = 4'b0010, S3 = 4'b0011, S4 = 4'b0100, S5 = 4'b0101, S6 = 4'b0110;
-    parameter [3:0] S7 = 4'b0111, S8 = 4'b1000, S9 = 4'b1001;
+    parameter [3:0] S0 = 4'b0000, S1 = 4'b0001, S2 = 4'b0010, S3 = 4'b0011, S4 = 4'b0100, S5 = 4'b0101, S6 = 4'b0110,
+                    S7 = 4'b0111, S8 = 4'b1000, S9 = 4'b1001;
 
     initial begin
         state = S0;

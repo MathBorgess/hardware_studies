@@ -21,7 +21,7 @@ module MWcontroller(
     );
 
     timer timer_inst (
-        .clk(pgt_1hz), .rst(clearn), .enablen(mag_on), .load(load), .in(digit),
+        .clk(pgt_1hz), .rst(!clearn), .enablen(mag_on), .load(load), .in(digit),
         .out_second_unit(out_second_unit), .out_second_tens(out_second_tens),
         .out_minute_unit(out_minute_unit), .out_minute_tens(out_minute_tens),
         .finished(timer_done)
@@ -40,7 +40,7 @@ module MWcontroller(
     );
 
     always @(*) begin
-        mag_on = !mag_on_;
+        mag_on = mag_on_;
         sec_ones_segs = display_second_unit;
         sec_tens_segs = display_second_tens;
         min_ones_segs = display_minute_unit;

@@ -9,7 +9,7 @@ module input_encoder(
     output reg load, pgt_1hz,
     output reg [3:0] digit
 );
-wire counter_out, clk100, clk100_, tick, load_;
+wire counter_out, clk1, clk10, tick;
 reg keypad_pressed;
 wire [3:0] bcd_digit;
 
@@ -19,24 +19,24 @@ encoder_BCD bcd (
     .BCD(bcd_digit)
 );
 
-freqdiv50M freqdiv100 (
+freqdiv50M freqdiv50Mto1 (
     .clk(clk),
-    .clk100(clk100)
+    .clk1(clk1)
 );
-freqdiv freqdiv__(
+freqdiv5M freqdiv50Mto10(
     .clk(clk),
-    .clk100_(clk100_)
+    .clk10(clk10)
 ); 
 
 counter_up7_NR counter (
-    .clk(clk100_),
+    .clk(clk10),
     .clear(keypad_pressed),
     .out(counter_out)
 );
 
 MUX2_1 mux2_1 (
     .out_count7NR(counter_out),
-    .clk100(clk100),
+    .clk1(clk1),
     .enablen(enablen),
     .pgt_1hz(tick)
 );

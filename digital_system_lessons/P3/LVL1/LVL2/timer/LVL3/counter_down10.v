@@ -12,20 +12,12 @@ module counter_down10(in, clk, load, en, clearn, count, tc, count_end);
   begin
     if(!clearn)
       count = 4'b0000;
-    if (en) begin
+    else if (en) begin
       case (count)
-        4'b1001: begin
-          count <= 4'b1000;
-        end // 9 -> 8
-        4'b0001: begin 
-          count <= 4'b0000;
-        end  // 1 -> 0
-        4'b0000: begin
-          count <= 4'b1001;
-        end // 0 -> 9
+        4'b0000: count <= 4'b1001; // 0 -> 9
         default: count <= count - 4'b0001;
       endcase 
-      end else begin
+    end else begin
       if(load)
         count <= in;
     end

@@ -52,7 +52,6 @@ module timer(
         .count_end(count_end_minute_ten),
         .tc(tc_minute_tens)
     );
-    parameter [3:0] S0 = 4'b0000;
 
     always @(*) begin
         if ( count_end_second_unit & count_end_second_ten & count_end_minute_unit & count_end_minute_ten ) begin

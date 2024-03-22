@@ -11,22 +11,14 @@ module counter_down6(in, clk, load, en, clearn, count, tc, count_end);
   always @ (posedge clk)
   begin
     if(!clearn)
-        count = 4'b0000;
-    if (en) begin
+      count = 4'b0000;
+    else if (en) begin
       case (count)
-        4'b0101: begin
-          count <= 4'b0100;
-        end // 5 -> 4
-        4'b0001: begin 
-          count <= 4'b0000;
-        end  // 1 -> 0
-        4'b0000: begin
-          count <= 4'b0101;
-        end // 0 -> 5
+        4'b0000: count <= 4'b0101; // 0 -> 5
         default: count <= count - 4'b0001;
       endcase
     end else begin
-      if(load) // Lembrar q aq o valor do load tá invertido
+      if(load) 
         count <= in;
     end
   end

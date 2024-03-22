@@ -1,35 +1,35 @@
-// clk -> 100hz ; clk100 -> 1hz
-module freqdiv (
+// clk -> 50mhz ; clk10 -> 10hz
+module freqdiv5M (
     input clk, 
-    output reg clk100_
+    output reg clk10
 );
-    parameter tfm = 2500000;
+    parameter limit = 2500000;
     reg [24:0] count = 0;
-    initial clk100_ = 1'b1;
+    initial clk10 = 1'b1;
     
     always @(posedge clk) begin
         count = count + 1;
-        if(count == (tfm+1)) begin
+        if(count == (limit+1)) begin
             count = 1;
-            clk100_ = ~clk100_;
+            clk10 = ~clk10;
         end
     end
 endmodule
 
-// clk -> 50Mhz ; clk50m -> 1hz
+// clk -> 50Mhz ; clk1 -> 1hz
 module freqdiv50M (
     input clk, 
-    output reg clk100
+    output reg clk1
 );
-    parameter tfm = 25000000;
+    parameter limit = 25000000;
     reg [24:0] count = 0;
-    initial clk100 = 1'b1;
+    initial clk1 = 1'b1;
     
     always @(posedge clk) begin
         count = count + 1;
-        if(count == (tfm+1)) begin
+        if(count == (limit+1)) begin
             count = 1;
-            clk100 = ~clk100;
+            clk1 = ~clk1;
         end
     end
 endmodule

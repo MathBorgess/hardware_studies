@@ -13,7 +13,12 @@
     # ($s1) c = (l+r)//2 
     add $s1, $s2, $s0
     srl	$s1, $s1, 1 
-    
+
+# chamada inicial    
+main:
+	jal bs
+	j EXIT
+	
 # Definição da função bs
 bs:
     addi $sp, $sp, -16   
@@ -64,3 +69,5 @@ continue_bs:
     lw $s2, 0($sp)    # Restaura 'r'
     addi $sp, $sp, 16    
     jr $ra    # Retornar ao chamador
+
+EXIT:

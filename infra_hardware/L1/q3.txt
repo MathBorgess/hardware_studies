@@ -1,0 +1,13 @@
+3. (1,25) Sua certificação de programador MIPS está prestes a expirar. Para solicitar a renovação, responda:
+    
+    a. (0,2) Como é organizada a memória na arquitetura MIPS?
+        A memória é organizada como uma sequência de palavras de 32 bits e é endereçada por byte. No caso da arquitetura do MIPS o byte mais significativo está no menor endereço da palavra.
+    
+    b. (0,4) Quais as principais diferenças entre utilizar registradores e memória?
+        O acesso aos registradores é mais rápido e mais limitado em armazenamento por existir em menor quantidade. A memória é mais extensa (comporta mais palavras) porém o acesso ao conteúdo da memória é mais lento.
+    
+    c. (0,4) Qual a diferença entre Big Endian e Little Endian? E como são armazenados na memória?
+        A diferença fundamental entre elas está na ordem em que os bytes são armazenados num endereço de palavra. Big Endian: O byte mais significativo é armazenado no endereço mais baixo da palavra. Little Endian: O byte mais significativo é armazenado no endereço mais alto da palavra.
+    
+    d. (0,25) Qual a importância da pilha nos processadores e que preocupações ter ao manipular a pilha?
+        A pilha evita a perda dos valores armazenados nos registradores que serão usados numa certa subrotina; uma vez armazenados na pilha, pode-se recuperar os valores posteriormente. Como o acesso à pilha é feito na memória, isso pode reduzir o desempenho da rotina caso haja muitos acessos, além disso, muitos armazenamentos nela podem causar o estouro da pilha.

@@ -2,7 +2,7 @@
 
     a. (0,5) Qual a diferença entre uma arquitetura RISC e uma CISC?
         Arquitetura CISC (Complex Instruction Set Computer) possui um conjunto de instruções mais complexas (exemplo loop) e difícil implementação e que muitas vezes acabam não sendo todas utilizadas.
-        Enquanto uma arquitetura RISC possui instruções mais simples de serem implementadas e que, por sua vez, possui fácil implementação.
+        Enquanto uma arquitetura RISC (Reduced Instruction Set Computer) possui instruções mais simples e em menor quantidade, sendo implementadas mais facilmente no hardware.
 
     b. (0,5) Explique o propósito da arquitetura MIPS
         O  MIPS foi um processador desenvolvido nos anos 80 de propósito geral e até hoje utilizado. São processadores utilizados em sistemas embarcados, por isso possui uma aplicação mais diversificada em meios eletrônicos, equipamentos de redes, câmeras, impressoras, smart watches.

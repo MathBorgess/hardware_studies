@@ -21,7 +21,7 @@ module div (
     4.  if currDigit>0: do currDigit-=1 then goto 2.
         else: divRun = 0
 */	
-    reg divRun, signalA, signalB;
+    reg divRun, signalA, signalB, signalQuot;
     reg [31:0] numerator, quotient; // intermediates for srcA and lo
     reg [31:0] denominator, remainder; // intermediates for srcB and hi
     reg [5:0] cycleCount, currDigit;
@@ -41,8 +41,11 @@ module div (
                 divZero = 0;
             end 
             else begin
-                signalQuot = srcA[31] ^ srcB[31]; 
-                numerator = srcA[30:0]; denominator = srcB[30:0];  
+                signalA = srcA[31];
+                signalB = srcB[31];
+                signalQuot = signalA ^ signalB; 
+                numerator = signalA ? ~srcA + 1 : srcA;
+                denominator = signalB ? ~srcB + 1 : srcB;  
 
                 quotient = 31'b0; remainder = 31'b0;
                 divRun = 1'b1; divZero = 1'b1;
@@ -63,8 +66,8 @@ module div (
             cycleCount <= cycleCount+1'b1;
             if(cycleCount==5'b11111) begin  // stop div
                 divRun=0;
-                hi = {1'b0,remainder};
-                lo = {signalQuot,quotient};
+                hi = signalQuot && (remainder != 0) ? (denominator - remainder) : remainder;
+                lo = signalQuot ? ~(quotient+ (remainder != 0 ? 1 : 0)) + 1 : quotient;
             end
             else begin //-1
                 currDigit = currDigit-1'b1;

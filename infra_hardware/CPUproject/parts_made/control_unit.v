@@ -46,7 +46,7 @@ output reg [1:0]    RegDst,    //4 entradas
 //Muxs (até 8 entradas)
 output reg [2:0]    ALUSrcB,            //5 entradas
 output reg [2:0]    AddressCtrl,         //7 entradas
-output reg [2:0]    RegSrc,    //7 entradas
+output reg [2:0]    RegSrc,    //8 entradas
 
 //Registers
 output reg          EPC_Load,
@@ -157,6 +157,7 @@ parameter Op_Jal            =       6'b000011;
 //Funct of type R
 parameter Funct_Add         =       6'b100000;
 parameter Funct_And         =       6'b100100;
+parameter Funct_Or          =       6'b100101;
 parameter Funct_Div         =       6'b011010;
 parameter Funct_Mult        =       6'b011000;
 parameter Funct_Jr          =       6'b001000;
@@ -245,7 +246,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -276,7 +276,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -300,7 +299,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -509,7 +507,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -531,7 +528,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -558,7 +554,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -586,7 +581,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -608,7 +602,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -635,7 +628,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -663,7 +655,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -685,7 +676,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -712,7 +702,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -742,7 +731,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -770,7 +758,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -800,7 +787,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -824,7 +810,60 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
+                    
+                    MultInit            =   1'b0;
+                    DivInit             =   1'b0;
+
+                    //next state
+                    states = state_Fetch;
+                    counter = 5'b00000;
+                end
+            end
+
+            //OR
+            state_Or: begin
+                if (counter == 5'b00000) begin
+                    ALUSrcA            =   2'b10; ////
+                    ALUSrcB            =   3'b100; ////
+                    ALU                =   3'b011; ////
+                    EPC_Load           =   1'b0;
+                    MDR_Load           =   1'b0;
+                    IRWrite            =   1'b0;
+                    writeHL            =   1'b0;
+                    A_Load             =   1'b0;
+                    B_Load             =   1'b0;
+                    ALUOut_Load        =   1'b1; ////
+                    ALUOutSrc          =   2'b10; ////
+                    MemWR              =   1'b0;
+                    IRWrite            =   1'b0;
+                    PCWrite            =   1'b0;
+                    PCWriteCond        =   1'b0;
+                    FlagOption         =   1'b0;
+                    BranchOption       =   1'b0;
+                    
+                    MultInit           =   1'b0;
+                    DivInit            =   1'b0;
+
+                    //next state
+                    states = state_Or;
+                    counter = counter + 5'b00001;
+                    
+                end else if (counter == 5'b00001) begin
+                    RegDst              =   2'b11; ////
+                    RegSrc              =   3'b101; ////
+                    EPC_Load            =   1'b0;
+                    MDR_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL             =   1'b0;
+                    A_Load              =   1'b0;
+                    B_Load              =   1'b0;
+                    ALUOut_Load         =   1'b0;
+                    MemWR               =   1'b0;
+                    RegWrite            =   1'b1; ////
+                    PCWrite             =   1'b0;
+                    PCWriteCond         =   1'b0;
+                    FlagOption          =   1'b0;
+                    BranchOption        =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -854,7 +893,6 @@ always @(posedge clk) begin
                 PCWriteCond               =   1'b0;
                 FlagOption               =   1'b0;
                 BranchOption               =   1'b0;
-                IsBGT               =   1'b0;
                 
                 MultInit            =   1'b0;
                 DivInit             =   1'b1;
@@ -894,7 +932,6 @@ always @(posedge clk) begin
                 PCWriteCond               =   1'b0;
                 FlagOption               =   1'b0;
                 BranchOption               =   1'b0;
-                IsBGT               =   1'b0;
                 
                 MultInit            =   1'b1;
                 DivInit             =   1'b0;
@@ -933,7 +970,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -962,7 +998,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -991,7 +1026,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1021,7 +1055,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
 
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1046,7 +1079,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1069,7 +1101,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1099,7 +1130,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1124,7 +1154,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1147,7 +1176,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1177,7 +1205,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1201,7 +1228,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1231,7 +1257,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1256,7 +1281,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1279,7 +1303,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1309,7 +1332,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1334,7 +1356,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1357,7 +1378,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1387,7 +1407,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1412,7 +1431,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
 
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1435,7 +1453,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
 
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1465,7 +1482,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1493,7 +1509,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1524,7 +1539,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1552,7 +1566,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1583,7 +1596,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1611,7 +1623,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1641,7 +1652,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1665,7 +1675,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1696,7 +1705,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b1; ////
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1727,7 +1735,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b1; ////
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1758,7 +1765,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b1; ////
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1790,7 +1796,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b1; ////
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1821,7 +1826,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1848,7 +1852,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1870,7 +1873,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1895,7 +1897,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1926,7 +1927,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1953,7 +1953,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -1975,7 +1974,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2000,7 +1998,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2029,7 +2026,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2060,7 +2056,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2087,7 +2082,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2109,7 +2103,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2134,7 +2127,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2165,7 +2157,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2192,7 +2183,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2214,7 +2204,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2239,7 +2228,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2270,7 +2258,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2297,7 +2284,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2319,7 +2305,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2344,7 +2329,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2375,7 +2359,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2399,7 +2382,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2430,7 +2412,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2458,7 +2439,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2486,7 +2466,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2516,7 +2495,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -2541,7 +2519,6 @@ always @(posedge clk) begin
                     PCWriteCond               =   1'b0;
                     FlagOption               =   1'b0;
                     BranchOption               =   1'b0;
-                    IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;

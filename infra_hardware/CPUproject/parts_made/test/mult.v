@@ -51,14 +51,14 @@ module multiplier_tb;
         a_in = 'd26;
 		b_in = 'd30;
 		start = 1;
-		#200
+		#100
 		start = 0;
 		#(100*n_bits)
         $display("hi = %d, lo = %d", hi, lo);
 		a_in = ~'d13 + 1;
 		b_in = 'd13 ;
 		start = 1;
-		#200
+		#100
 		start = 0;
 		#(100*n_bits)
         $display("%b%b", hi, lo);

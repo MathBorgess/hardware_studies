@@ -14,9 +14,9 @@
 
 /*
     Faltam os estados das instruções:
-    1. xchg rs, rt
-    2. divm rt, offset(rs)
-    3. or rd, rs, rt
+    X 1. xchg rs, rt
+    X 2. divm rt, offset(rs)
+    X 3. or rd, rs, rt
 */
 
 
@@ -25,61 +25,52 @@ module Unid_Control (
 //INPUT PORTS
 input wire          clk,
 input wire          Reset_In,
-input wire [5:0]    Opcode,
+input wire [5:0]    OPCODE,
 input wire [15:0]   IMMEDIATE,
 input wire          Overflow,
-input wire          Zero_Div,
-input wire          MultStop,
-input wire          DivStop,
 input wire          DivZero,
 
 //OUTPUT PORTS
 //Muxs (até 2 entradas)
-output reg          Mux_WD_Memory,
-output reg          Mux_High,
-output reg          Mux_Low,
-output reg          Mux_Extend,
-output reg          Mux_B,
-output reg          Mux_Entrada,
-output reg          Mux_N,
+output reg          WriteMemoSrc,
+output reg          writeHL,
+output reg          ALUOutSrc,
+output reg          ShiftSrc,
+output reg          ShiftAmt,
 
 //Muxs (até 4 entradas)
-output reg [1:0]    Mux_A,               //3 entradas
-output reg [1:0]    Mux_ALU1,            //3 entradas
-output reg [1:0]    Mux_ALU2,            //4 entradas
-output reg [1:0]    Mux_PC,              //4 entradas
-output reg [1:0]    Mux_WR_Registers,    //4 entradas
+output reg [1:0]    ALUSrcA,            //4 entradas
+output reg [1:0]    PCSource,              //4 entradas
+output reg [1:0]    RegDst,    //4 entradas
 
 //Muxs (até 8 entradas)
-output reg [2:0]    Mux_Address,         //5 entradas
-output reg [2:0]    Mux_WD_Registers,    //7 entradas
+output reg [2:0]    ALUSrcB,            //5 entradas
+output reg [2:0]    AddressCtrl,         //7 entradas
+output reg [2:0]    RegSrc,    //7 entradas
 
 //Registers
-output reg          Adress_RG_Load,
 output reg          EPC_Load,
 output reg          MDR_Load,
-output reg          IR_Load,
-output reg          High_Load,
-output reg          Low_Load,
+output reg          IRWrite,
+output reg          writeHL,
 output reg          A_Load,
 output reg          B_Load,
 output reg          ALUOut_Load,
 
 //Write and Read Controllers
-output reg          Store_Size,
-output reg [1:0]    Load_Size,
-output reg          Memory_WR,
-output reg          Reg_WR,
+output reg          RegWrite,
+output reg          StoreSizeCtrl,
+output reg [1:0]    LStoreSizeCtrl,
+output reg          MemWR,
 
 //Controlador Controllers
 output reg          PCWrite,
-output reg          IsBEQ,              //Antigo PCWriteCond
-output reg          IsBNE,
-output reg          IsBLE,
-output reg          IsBGT,
+output reg          PCWriteCond,              //Antigo PCWriteCond
+output reg          FlagOption,
+output reg          BranchOption,
 
 //Special Controllers
-output reg [2:0]    ULA,
+output reg [2:0]    ALU,
 output reg [2:0]    Shift,
 
 //Mult Controller
@@ -98,49 +89,50 @@ assign Funct = IMMEDIATE[5:0];
 
 //STATE PARAMETERS
 
-parameter State_Reset       =       6'b000000;
-parameter State_Fetch       =       6'b000001;
-parameter State_Decode      =       6'b000010;
-parameter State_Overflow    =       6'b000011;
-parameter State_Opcode404   =       6'b000100;
-parameter State_Div0        =       6'b000101;
+parameter state_Reset       =       6'b000000;
+parameter state_Fetch       =       6'b000001;
+parameter state_Decode      =       6'b000010;
+parameter state_Overflow    =       6'b000011;
+parameter state_Opcode404   =       6'b000100;
+parameter state_Div0        =       6'b000101;
 
-parameter State_Add         =       6'b000110;
-parameter State_And         =       6'b000111;
-parameter State_Div         =       6'b001000;
-parameter State_Mult        =       6'b001001;
-parameter State_Jr          =       6'b001010;
-parameter State_Mfhi        =       6'b001011;
-parameter State_Mflo        =       6'b001100;
-parameter State_Sll         =       6'b001101;
-parameter State_Sllv        =       6'b001110;
-parameter State_Slt         =       6'b001111;
-parameter State_Sra         =       6'b010000;
-parameter State_Srav        =       6'b010001;
-parameter State_Srl         =       6'b010010;
-parameter State_Sub         =       6'b010011;
-parameter State_Break       =       6'b010100;
-parameter State_RTE         =       6'b010101;
-parameter State_Addm        =       6'b010110;
+parameter state_Add         =       6'b000110;
+parameter state_And         =       6'b000111;
+parameter state_Div         =       6'b001000;
+parameter state_Mult        =       6'b001001;
+parameter state_Jr          =       6'b001010;
+parameter state_Mfhi        =       6'b001011;
+parameter state_Mflo        =       6'b001100;
+parameter state_Sll         =       6'b001101;
+parameter state_Sllv        =       6'b001110;
+parameter state_Slt         =       6'b001111;
+parameter state_Sra         =       6'b010000;
+parameter state_Srav        =       6'b010001;
+parameter state_Srl         =       6'b010010;
+parameter state_Sub         =       6'b010011;
+parameter state_Break       =       6'b010100;
+parameter state_RTE         =       6'b010101;
+parameter state_Or          =       6'b010110;
+parameter state_Xchg        =       6'b101000;
 
-parameter State_Addi        =       6'b010111;
-parameter State_Addiu       =       6'b011000;
-parameter State_Beq         =       6'b011001;
-parameter State_Bne         =       6'b011010;
-parameter State_Ble         =       6'b011011;
-parameter State_Bgt         =       6'b011100;
-parameter State_Sllm        =       6'b011101;
-parameter State_Lb          =       6'b011110;
-parameter State_Lh          =       6'b011111;
-parameter State_Lui         =       6'b100000;
-parameter State_Lw          =       6'b100001;
-parameter State_Sb          =       6'b100010;
-parameter State_Sh          =       6'b100011;
-parameter State_Slti        =       6'b100100;
-parameter State_Sw          =       6'b100101;
+parameter state_Addi        =       6'b010111;
+parameter state_Addiu       =       6'b011000;
+parameter state_Beq         =       6'b011001;
+parameter state_Bne         =       6'b011010;
+parameter state_Ble         =       6'b011011;
+parameter state_Bgt         =       6'b011100;
+parameter state_Divm        =       6'b011101;
+parameter state_Lb          =       6'b011110;
+parameter state_Lh          =       6'b011111;
+parameter state_Lui         =       6'b100000;
+parameter state_Lw          =       6'b100001;
+parameter state_Sb          =       6'b100010;
+parameter state_Sh          =       6'b100011;
+parameter state_Slti        =       6'b100100;
+parameter state_Sw          =       6'b100101;
 
-parameter State_J           =       6'b100110;
-parameter State_Jal         =       6'b100111;
+parameter state_J           =       6'b100110;
+parameter state_Jal         =       6'b100111;
 
 //Opcodes (istruction type)
 parameter Op_Type_r         =       6'b000000;
@@ -150,7 +142,7 @@ parameter Op_Beq            =       6'b000100;
 parameter Op_Bne            =       6'b000101;
 parameter Op_Ble            =       6'b000110;
 parameter Op_Bgt            =       6'b000111;
-parameter Op_Sllm           =       6'b000001;
+parameter Op_Divm           =       6'b000001;
 parameter Op_Lb             =       6'b100000;
 parameter Op_Lh             =       6'b100001;
 parameter Op_Lui            =       6'b001111;
@@ -179,149 +171,135 @@ parameter Funct_Srl         =       6'b000010;
 parameter Funct_Sub         =       6'b100010;
 parameter Funct_Break       =       6'b001101; 
 parameter Funct_RTE         =       6'b010011;
-parameter Funct_Addm        =       6'b000101;
+parameter Funct_Xchg        =       6'b000101;
+
 
 initial begin
-    //Mux_WR_Registers    =   2'b01;
-    //Mux_WD_Registers    =   3'b000;
-    //Reg_WR              =   1'b1;
-    states                =   State_Reset;
-    //counter             =   5'b00000;
+    states                =   state_Reset;
 end
 
 always @(posedge clk) begin
     //RESET
-    if ((Reset_In == 1'b1)) begin
-        Mux_WR_Registers    =   2'b01;       ////
-        Mux_WD_Registers    =   3'b000;      ////
-        Adress_RG_Load      =   1'b0;
+    if ((Reset_In == 1'b1) || state == state_Reset) begin
+        RegDst              =   2'b10;  
+        RegSrc              =   3'b000; 
+        RegWrite            =   1'b1; 
         EPC_Load            =   1'b0;
         MDR_Load            =   1'b0;
-        IR_Load             =   1'b0;
-        High_Load           =   1'b0;
-        Low_Load            =   1'b0;
+        IRWrite             =   1'b0;
+        writeHL            =   1'b0;
         A_Load              =   1'b0;
         B_Load              =   1'b0;
         ALUOut_Load         =   1'b0;
-        Memory_WR           =   1'b0;
-        Reg_WR              =   1'b1;        ////
+        MemWR               =   1'b0;
+        IRWrite             =   1'b1;        
         PCWrite             =   1'b0;
-        IsBEQ               =   1'b0;
-        IsBNE               =   1'b0;
-        IsBLE               =   1'b0;
-        IsBGT               =   1'b0;
+        PCWriteCond         =   1'b0;
+        FlagOption          =   1'b0;
+        BranchOption        =   1'b0;
 
         //next state
-        states = State_Fetch;
+        states = state_Fetch;
         counter = 5'b00000;
     end else begin
         case (states) //descobrir qual estado se esta para tornar o output adequado
             //FETCH
-            State_Fetch: begin
+            state_Fetch: begin
                 if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
-                    Mux_Address         =   3'b000; ////
-                    Mux_ALU1            =   2'b00; ////
-                    Mux_ALU2            =   2'b01; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b1; ////
+                    AddressCtrl         =   3'b000;
+                    ALUSrcA             =   2'b00; 
+                    ALUSrcB             =   2'b01; 
+                    ALU                 =   3'b001;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
-                    ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    ALUOut_Load         =   1'b1;
+                    MemWR               =   1'b0;
+                    IRWrite             =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
-                    IsBGT               =   1'b0;
+                    PCWriteCond         =   1'b0;
+                    FlagOption          =   1'b0;
+                    BranchOption        =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00011) begin
-                    Mux_PC              =   2'b10; ////
-                    Adress_RG_Load      =   1'b0;
+                    PCSource              =   2'b10; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b1; ////
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b1; ////
+                    writeHL             =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b1; ////
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Decode;
+                    states = state_Decode;
                     counter = 5'b00000;
                     end
             end 
 
             //DECODE
-            State_Decode: begin
+            state_Decode: begin
                 if (counter == 5'b00000) begin
                     Mux_Extend          =   1'b1; ////
-                    Mux_ALU1            =   2'b00; ////
-                    Mux_ALU2            =   2'b11; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b00; ////
+                    ALUSrcB            =   2'b11; ////
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Decode;
+                    states = state_Decode;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
                     Mux_A               =   2'b01; ////
                     Mux_B               =   1'b0; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b1; ////
                     B_Load              =   1'b1; ////
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
@@ -329,581 +307,553 @@ always @(posedge clk) begin
 
                     //next state
                     counter = 5'b00000;
-                    case (Opcode) //Analisando Opcode da operacao atual para definir o proximo estado
+                    case (OPCODE) //Analisando OPCODE da operacao atual para definir o proximo estado
                         //OP Tipo R
                         Op_Type_r: begin
                             case (Funct) //Analisando campo Funct do tipo R
                                 //Funct ADD
                                 Funct_Add: begin
-                                    states = State_Add;
+                                    states = state_Add;
                                 end
 
                                 //Funct AND
                                 Funct_And: begin
-                                    states = State_And;
+                                    states = state_And;
                                 end
 
                                 //Funct DIV
                                 Funct_Div: begin
-                                    states = State_Div;
+                                    states = state_Div;
                                 end
 
                                 //Funct MULT
                                 Funct_Mult: begin
-                                    states = State_Mult;
+                                    states = state_Mult;
                                 end
 
                                 //Funct JR
                                 Funct_Jr: begin
-                                    states = State_Jr;
+                                    states = state_Jr;
                                 end
 
                                 //Funct MFHI
                                 Funct_Mfhi: begin
-                                    states = State_Mfhi;
+                                    states = state_Mfhi;
                                 end
 
                                 //Funct MFLO
                                 Funct_Mflo: begin
-                                    states = State_Mflo;
+                                    states = state_Mflo;
                                 end
 
                                 //Funct SLL
                                 Funct_Sll: begin
-                                    states = State_Sll;
+                                    states = state_Sll;
                                 end
                                 
                                 //Funct SLLV
                                 Funct_Sllv: begin
-                                    states = State_Sllv;
+                                    states = state_Sllv;
                                 end
 
                                 //Funct SLT
                                 Funct_Slt: begin
-                                    states = State_Slt;
+                                    states = state_Slt;
                                 end
 
                                 //Funct SRA
                                 Funct_Sra: begin
-                                    states = State_Sra;
+                                    states = state_Sra;
                                 end
 
                                 //Funct SRAV
                                 Funct_Srav: begin
-                                    states = State_Srav;
+                                    states = state_Srav;
                                 end
 
                                 //Funct SRL
                                 Funct_Srl: begin
-                                    states = State_Srl;
+                                    states = state_Srl;
                                 end
 
                                 //Funct SUB
                                 Funct_Sub: begin
-                                    states = State_Sub;
+                                    states = state_Sub;
                                 end
 
                                 //Funct BREAK
                                 Funct_Break: begin
-                                    states = State_Break;
+                                    states = state_Break;
                                 end
 
                                 //Funct RTE
                                 Funct_RTE: begin
-                                    states = State_RTE;
+                                    states = state_RTE;
                                 end
 
                                 //Funct ADDM  
                                 Funct_Addm: begin
-                                    states = State_Addm;
+                                    states = state_Or;
                                 end
 
                                 default: //erro de opcode
-                                    states = State_Opcode404;
+                                    states = state_Opcode404;
                             endcase
                         end
 
                         //Op ADDI
                         Op_Addi: begin
-                            states = State_Addi;
+                            states = state_Addi;
                         end
 
                         //Op ADDIU
                         Op_Addiu: begin
-                            states = State_Addiu;
+                            states = state_Addiu;
                         end
 
                         //Op BEQ
                         Op_Beq: begin
-                            states = State_Beq;
+                            states = state_Beq;
                         end
 
                         //Op BNE
                         Op_Bne: begin
-                            states = State_Bne;
+                            states = state_Bne;
                         end
 
                         //Op BLE
                         Op_Ble: begin
-                            states = State_Ble;
+                            states = state_Ble;
                         end
 
                         //Op BGT
                         Op_Bgt: begin
-                            states = State_Bgt;
+                            states = state_Bgt;
                         end
 
                         //Op SLLM
                         Op_Sllm: begin
-                            states = State_Sllm;
+                            states = state_Sllm;
                         end
 
                         //Op LB
                         Op_Lb: begin
-                            states = State_Lb;
+                            states = state_Lb;
                         end
 
                         //Op LH
                         Op_Lh: begin
-                            states = State_Lh;
+                            states = state_Lh;
                         end
 
                         //Op LUI
                         Op_Lui: begin
-                            states = State_Lui;
+                            states = state_Lui;
                         end
 
                         //Op LW
                         Op_Lw: begin
-                            states = State_Lw;
+                            states = state_Lw;
                         end
 
                         //Op SB
                         Op_Sb: begin
-                            states = State_Sb;
+                            states = state_Sb;
                         end
 
                         //Op SH
                         Op_Sh: begin
-                            states = State_Sh;
+                            states = state_Sh;
                         end
 
                         //Op SLTI
                         Op_Slti: begin
-                            states = State_Slti;
+                            states = state_Slti;
                         end
 
                         //Op SW
                         Op_Sw: begin
-                            states = State_Sw;
+                            states = state_Sw;
                         end
 
                         //Op J
                         Op_J: begin
-                            states = State_J;
+                            states = state_J;
                         end
 
                         //Op JAL
                         Op_Jal: begin
-                            states = State_Jal;
+                            states = state_Jal;
                         end
 
                         default:
-                            states = State_Opcode404;
+                            states = state_Opcode404;
                     endcase
                 end
             end
 
             //OVERFLOW
-            State_Overflow: begin
+            state_Overflow: begin
                 if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
-                    Mux_Address         =   3'b011; ////
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b011; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00011) begin
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b1; ////
                     MDR_Load            =   1'b1; ////
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00100) begin
                     Mux_Extend          =   1'b0; ////
-                    Mux_ALU1            =   2'b10; ////
-                    Mux_ALU2            =   2'b10; ////
-                    Mux_PC              =   2'b01; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b10; ////
+                    ALUSrcB            =   2'b10; ////
+                    PCSource              =   2'b01; ////
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b1; ////
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //OPCODE INEXISTENTE
-            State_Opcode404: begin
+            state_Opcode404: begin
                 if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
-                    Mux_Address         =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b010; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Opcode404;
+                    states = state_Opcode404;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00011) begin
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b1; ////
                     MDR_Load            =   1'b1; ////
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Opcode404;
+                    states = state_Opcode404;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00100) begin
                     Mux_Extend          =   1'b0; ////
-                    Mux_ALU1            =   2'b10; ////
-                    Mux_ALU2            =   2'b10; ////
-                    Mux_PC              =   2'b01; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b10; ////
+                    ALUSrcB            =   2'b10; ////
+                    PCSource              =   2'b01; ////
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b1; ////
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //DIVISAO POR 0
-            State_Div0: begin
+            state_Div0: begin
                 if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
-                    Mux_Address         =   3'b100; ////
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b100; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Div0;
+                    states = state_Div0;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00011) begin
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b1; ////
                     MDR_Load            =   1'b1; ////
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Div0;
+                    states = state_Div0;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00100) begin
                     Mux_Extend          =   1'b0; ////
-                    Mux_ALU1            =   2'b10; ////
-                    Mux_ALU2            =   2'b10; ////
-                    Mux_PC              =   2'b01; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b10; ////
+                    ALUSrcB            =   2'b10; ////
+                    PCSource              =   2'b01; ////
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b1; ////
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
             
             //ADD 
-            State_Add: begin
+            state_Add: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b00; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b00; ////
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
                     
                     //next state
-                    states = State_Add;
+                    states = state_Add;
                     counter = counter + 5'b00001;
                 end else if (Overflow && counter == 5'b00001) begin
                     //Erro de overflow so deve ser analisado apos o calculo
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = 5'b00000;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b010; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //AND
-            State_And: begin
+            state_And: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b00; ////
-                    ULA                 =   3'b011; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b00; ////
+                    ALU                 =   3'b011; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_And;
+                    states = state_And;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b010; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //DIV
-            State_Div: begin
-                Mux_ALU1            =   2'b00;
-                Mux_ALU2            =   2'b00;
-                ULA                 =   3'b000;
-                Mux_PC              =   2'b00;
-                Adress_RG_Load      =   1'b0;
+            state_Div: begin
+                ALUSrcA            =   2'b00;
+                ALUSrcB            =   2'b00;
+                ALU                 =   3'b000;
+                PCSource              =   2'b00;
                 EPC_Load            =   1'b0;
                 MDR_Load            =   1'b0;
-                IR_Load             =   1'b0;
-                High_Load           =   1'b0;
-                Low_Load            =   1'b0;
+                IRWrite             =   1'b0;
+                writeHL            =   1'b0;
                 A_Load              =   1'b0;
                 B_Load              =   1'b0;
                 ALUOut_Load         =   1'b0; 
-                Memory_WR           =   1'b0;
-                Reg_WR              =   1'b0;
+                MemWR           =   1'b0;
+                IRWrite              =   1'b0;
                 PCWrite             =   1'b0;
-                IsBEQ               =   1'b0;
-                IsBNE               =   1'b0;
-                IsBLE               =   1'b0;
+                PCWriteCond               =   1'b0;
+                FlagOption               =   1'b0;
+                BranchOption               =   1'b0;
                 IsBGT               =   1'b0;
                 
                 MultInit            =   1'b0;
@@ -911,1817 +861,1693 @@ always @(posedge clk) begin
                 //inserir if divzero
                 if(!DivZero)begin
                     DivInit             =   1'b0;
-                    states = State_Div0;
+                    states = state_Div0;
                 end
                 else if(!DivStop)begin
-                    states = State_Div;
+                    states = state_Div;
                 end
                 else begin
-                    Mux_High            =   1'b1;
+                    writeHL            =   1'b1;
                     Mux_Low             =   1'b1;
-                    High_Load           =   1'b1;
-                    Low_Load            =   1'b1;
+                    writeHL            =   1'b1;
                     DivInit             =   1'b0;
-                    states              =   State_Fetch;
+                    states              =   state_Fetch;
                 end
             end
 
             //MULT
-            State_Mult: begin
-                Mux_ALU1            =   2'b00;
-                Mux_ALU2            =   2'b00;
-                ULA                 =   3'b000;
-                Mux_PC              =   2'b00;
-                Adress_RG_Load      =   1'b0;
+            state_Mult: begin
+                ALUSrcA            =   2'b00;
+                ALUSrcB            =   2'b00;
+                ALU                 =   3'b000;
+                PCSource              =   2'b00;
                 EPC_Load            =   1'b0;
                 MDR_Load            =   1'b0;
-                IR_Load             =   1'b0;
-                High_Load           =   1'b0;
-                Low_Load            =   1'b0;
+                IRWrite             =   1'b0;
+                writeHL            =   1'b0;
                 A_Load              =   1'b0;
                 B_Load              =   1'b0;
                 ALUOut_Load         =   1'b0; 
-                Memory_WR           =   1'b0;
-                Reg_WR              =   1'b0;
+                MemWR           =   1'b0;
+                IRWrite              =   1'b0;
                 PCWrite             =   1'b0;
-                IsBEQ               =   1'b0;
-                IsBNE               =   1'b0;
-                IsBLE               =   1'b0;
+                PCWriteCond               =   1'b0;
+                FlagOption               =   1'b0;
+                BranchOption               =   1'b0;
                 IsBGT               =   1'b0;
                 
                 MultInit            =   1'b1;
                 DivInit             =   1'b0;
 
-                states = State_Mult;
+                states = state_Mult;
 
                 if (!MultStop)begin
-                    states = State_Mult;
+                    states = state_Mult;
                 end
                 else begin
-                    Mux_High            =   1'b0;
+                    writeHL            =   1'b0;
                     Mux_Low             =   1'b0;
-                    High_Load           =   1'b1;
-                    Low_Load            =   1'b1;
+                    writeHL            =   1'b1;
                     MultInit            =   1'b0;
-                    states              =   State_Fetch;
+                    states              =   state_Fetch;
                 end
             end
             
             //JR
-            State_Jr: begin
+            state_Jr: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b00; ////
-                    ULA                 =   3'b000; ////
-                    Mux_PC              =   2'b01; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b00; ////
+                    ALU                 =   3'b000; ////
+                    PCSource              =   2'b01; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0; 
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b1; ////
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end 
             end
 
             //MFHI
-            State_Mfhi: begin
+            state_Mfhi: begin
                 if (counter == 5'b00000) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b100; ////
-                    Adress_RG_Load      =   1'b0;
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b100; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //MFLO
-            State_Mflo: begin
+            state_Mflo: begin
                 if (counter == 5'b00000) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b011; ////
-                    Adress_RG_Load      =   1'b0;
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b011; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //SLL
-            State_Sll: begin
+            state_Sll: begin
                 if (counter == 5'b00000) begin
-                    Mux_Entrada         =   1'b1; ////
-                    Mux_N               =   1'b1; ////
+                    ShiftSrc         =   1'b1; ////
+                    ShiftAmt               =   1'b1; ////
                     Shift               =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
 
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sll;
+                    states = state_Sll;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b101; ////
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b101; ////
                     Shift               =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sll;
+                    states = state_Sll;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00010) begin
                     Shift               =   3'b000; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //SLLV
-            State_Sllv: begin
+            state_Sllv: begin
                 if (counter == 5'b00000) begin
-                    Mux_Entrada         =   1'b0; ////
-                    Mux_N               =   1'b0; ////
+                    ShiftSrc         =   1'b0; ////
+                    ShiftAmt               =   1'b0; ////
                     Shift               =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sllv;
+                    states = state_Sllv;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b101; ////
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b101; ////
                     Shift               =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0; 
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0; 
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sllv;
+                    states = state_Sllv;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00010) begin
                     Shift               =   3'b000; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; //
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; //
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //SLT
-            State_Slt: begin
+            state_Slt: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b00; ////
-                    ULA                 =   3'b111; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b00; ////
+                    ALU                 =   3'b111; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Slt;
+                    states = state_Slt;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b110; ////
-                    Adress_RG_Load      =   1'b0;
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b110; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //SRA
-            State_Sra: begin
+            state_Sra: begin
                 if (counter == 5'b00000) begin
-                    Mux_Entrada         =   1'b1; ////
-                    Mux_N               =   1'b1; ////
+                    ShiftSrc         =   1'b1; ////
+                    ShiftAmt               =   1'b1; ////
                     Shift               =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sra;
+                    states = state_Sra;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b101; ////
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b101; ////
                     Shift               =   3'b100; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sra;
+                    states = state_Sra;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00010) begin
                     Shift               =   3'b000; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
             
             //SRAV
-            State_Srav: begin
+            state_Srav: begin
                 if (counter == 5'b00000) begin//AQUI
-                    Mux_Entrada         =   1'b0; ////
-                    Mux_N               =   1'b0; ////
+                    ShiftSrc         =   1'b0; ////
+                    ShiftAmt               =   1'b0; ////
                     Shift               =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Srav;
+                    states = state_Srav;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b101; ////
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b101; ////
                     Shift               =   3'b100; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;//
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;//
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Srav;
+                    states = state_Srav;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00010) begin
                     Shift               =   3'b000; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //SRL
-            State_Srl: begin
+            state_Srl: begin
                 if (counter == 5'b00000) begin
-                    Mux_Entrada         =   1'b1; ////
-                    Mux_N               =   1'b1; ////
+                    ShiftSrc         =   1'b1; ////
+                    ShiftAmt               =   1'b1; ////
                     Shift               =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Srl;
+                    states = state_Srl;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b101; ////
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b101; ////
                     Shift               =   3'b011; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
 
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Srl;
+                    states = state_Srl;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00010) begin
                     Shift               =   3'b000; ////
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
 
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //SUB
-            State_Sub: begin
+            state_Sub: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b00; ////
-                    ULA                 =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b00; ////
+                    ALU                 =   3'b010; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sub;
+                    states = state_Sub;
                     counter = counter + 5'b00001;
                 end else if (Overflow && counter == 5'b00001) begin
                     //Erro de overflow so deve ser analisado apos o calculo
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = 5'b00000;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b11; ////
-                    Mux_WD_Registers    =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
+                    RegDst    =   2'b11; ////
+                    RegSrc    =   3'b010; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //BREAK
-            State_Break: begin
+            state_Break: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b00; ////
-                    Mux_ALU2            =   2'b01; ////
-                    Mux_PC              =   2'b01; ////
-                    ULA                 =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b00; ////
+                    ALUSrcB            =   2'b01; ////
+                    PCSource              =   2'b01; ////
+                    ALU                 =   3'b010; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b1; ////
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //RTE
-            State_RTE: begin
+            state_RTE: begin
                 if (counter == 5'b00000) begin
-                    Mux_PC              =   2'b00; ////
-                    Adress_RG_Load      =   1'b0;
+                    PCSource              =   2'b00; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b1; ////
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //ADDI
-            State_Addi: begin
+            state_Addi: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b10; ////
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b10; ////
                     Mux_Extend          =   1'b1; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Addi;
+                    states = state_Addi;
                     counter = counter + 5'b00001;
                 end else if (Overflow && counter == 5'b00001) begin
                     //Erro de overflow so deve ser analisado apos o calculo
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = 5'b00000;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b00; ////
-                    Mux_WD_Registers    =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
+                    RegDst    =   2'b00; ////
+                    RegSrc    =   3'b010; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //ADDIU
-            State_Addiu: begin
+            state_Addiu: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b10; ////
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b10; ////
                     Mux_Extend          =   1'b1; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Addiu;
+                    states = state_Addiu;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b00; ////
-                    Mux_WD_Registers    =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
+                    RegDst    =   2'b00; ////
+                    RegSrc    =   3'b010; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //BEQ
-            State_Beq: begin
+            state_Beq: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b00; ////
-                    Mux_PC              =   2'b10; ////
-                    ULA                 =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b00; ////
+                    PCSource              =   2'b10; ////
+                    ALU                 =   3'b010; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b1; ////
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b1; ////
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //BNE
-            State_Bne: begin
+            state_Bne: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b00; ////
-                    Mux_PC              =   2'b10; ////
-                    ULA                 =   3'b010; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b00; ////
+                    PCSource              =   2'b10; ////
+                    ALU                 =   3'b010; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b1; ////
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b1; ////
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //BLE
-            State_Ble: begin
+            state_Ble: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b00; ////
-                    Mux_PC              =   2'b10; ////
-                    ULA                 =   3'b111; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b00; ////
+                    PCSource              =   2'b10; ////
+                    ALU                 =   3'b111; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b1; ////
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b1; ////
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
             
 
             //BGT
-            State_Bgt: begin
+            state_Bgt: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b00; ////
-                    Mux_PC              =   2'b10; ////
-                    ULA                 =   3'b111; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b00; ////
+                    PCSource              =   2'b10; ////
+                    ALU                 =   3'b111; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b1; ////
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //LB
-            State_Lb: begin
+            state_Lb: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b10; ////
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b10; ////
                     Mux_Extend          =   1'b1; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Lb;
+                    states = state_Lb;
                     counter = counter + 5'b00001;
                 end else if (Overflow && counter == 5'b00001) begin
                     //Erro de overflow so deve ser analisado apos o calculo
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = 5'b00000;
                 end else if (counter == 5'b00001 || counter == 5'b00010 || counter == 5'b00011) begin
-                    Mux_Address         =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Lb;
+                    states = state_Lb;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00100) begin
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b1; ////
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Lb;
+                    states = state_Lb;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    Load_Size           =   2'b00; ////
-                    Mux_WR_Registers    =   2'b00; ////
-                    Mux_WD_Registers    =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    LStoreSizeCtrl           =   2'b00; ////
+                    RegDst    =   2'b00; ////
+                    RegSrc    =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //LH
-            State_Lh: begin
+            state_Lh: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b10; ////
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b10; ////
                     Mux_Extend          =   1'b1; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Lh;
+                    states = state_Lh;
                     counter = counter + 5'b00001;
                 end else if (Overflow && counter == 5'b00001) begin
                     //Erro de overflow so deve ser analisado apos o calculo
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = 5'b00000;
                 end else if (counter == 5'b00001 || counter == 5'b00010 || counter == 5'b00011) begin
-                    Mux_Address         =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Lh;
+                    states = state_Lh;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00100) begin
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b1; ////
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Lh;
+                    states = state_Lh;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    Load_Size           =   2'b01; ////
-                    Mux_WR_Registers    =   2'b00; ////
-                    Mux_WD_Registers    =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    LStoreSizeCtrl           =   2'b01; ////
+                    RegDst    =   2'b00; ////
+                    RegSrc    =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //LUI
-            State_Lui: begin
+            state_Lui: begin
                 if (counter == 5'b00000) begin
-                    Mux_WR_Registers    =   2'b00; ////
-                    Mux_WD_Registers    =   3'b111; ////
-                    Adress_RG_Load      =   1'b0;
+                    RegDst    =   2'b00; ////
+                    RegSrc    =   3'b111; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //LW
-            State_Lw: begin
+            state_Lw: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b10; ////
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b10; ////
                     Mux_Extend          =   1'b1; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Lw;
+                    states = state_Lw;
                     counter = counter + 5'b00001;
                 end else if (Overflow && counter == 5'b00001) begin
                     //Erro de overflow so deve ser analisado apos o calculo
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = 5'b00000;
                 end else if (counter == 5'b00001 || counter == 5'b00010 || counter == 5'b00011) begin
-                    Mux_Address         =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Lw;
+                    states = state_Lw;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00100) begin
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b1; ////
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Lw;
+                    states = state_Lw;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    Load_Size           =   2'b10; ////
-                    Mux_WR_Registers    =   2'b00; ////
-                    Mux_WD_Registers    =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    LStoreSizeCtrl           =   2'b10; ////
+                    RegDst    =   2'b00; ////
+                    RegSrc    =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //SB
-            State_Sb: begin
+            state_Sb: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b10; ////
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b10; ////
                     Mux_Extend          =   1'b1; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sb;
+                    states = state_Sb;
                     counter = counter + 5'b00001;
                 end else if (Overflow && counter == 5'b00001) begin
                     //Erro de overflow so deve ser analisado apos o calculo
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = 5'b00000;
                 end else if (counter == 5'b00001 || counter == 5'b00010 || counter == 5'b00011) begin
-                    Mux_Address         =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sb;
+                    states = state_Sb;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00100) begin
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b1; ////
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sb;
+                    states = state_Sb;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    Mux_Address         =   3'b001; ////
-                    Mux_WD_Memory       =   1'b1; ////
-                    Store_Size          =   1'b0; ////
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b001; ////
+                    WriteMemoSrc       =   1'b1; ////
+                    StoreSizeCtrl          =   1'b0; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b1; ////
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b1; ////
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //SH
-            State_Sh: begin
+            state_Sh: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b10; ////
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b10; ////
                     Mux_Extend          =   1'b1; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sh;
+                    states = state_Sh;
                     counter = counter + 5'b00001;
                 end else if (Overflow && counter == 5'b00001) begin
                     //Erro de overflow so deve ser analisado apos o calculo
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = 5'b00000;
                 end else if (counter == 5'b00001 || counter == 5'b00010 || counter == 5'b00011) begin
-                    Mux_Address         =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sh;
+                    states = state_Sh;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00100) begin
-                    Adress_RG_Load      =   1'b0;
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b1; ////
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sh;
+                    states = state_Sh;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    Mux_Address         =   3'b001; ////
-                    Mux_WD_Memory       =   1'b1; ////
-                    Store_Size          =   1'b1; ////
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b001; ////
+                    WriteMemoSrc       =   1'b1; ////
+                    StoreSizeCtrl          =   1'b1; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b1; ////
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b1; ////
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //SLTI
-            State_Slti: begin
+            state_Slti: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b10; ////
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b10; ////
                     Mux_Extend          =   1'b1; ////
-                    ULA                 =   3'b111; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALU                 =   3'b111; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Slti;
+                    states = state_Slti;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
-                    Mux_WR_Registers    =   2'b00; ////
-                    Mux_WD_Registers    =   3'b110; ////
-                    Adress_RG_Load      =   1'b0;
+                    RegDst    =   2'b00; ////
+                    RegSrc    =   3'b110; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //SW
-            State_Sw: begin
+            state_Sw: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b01; ////
-                    Mux_ALU2            =   2'b10; ////
+                    ALUSrcA            =   2'b01; ////
+                    ALUSrcB            =   2'b10; ////
                     Mux_Extend          =   1'b1; ////
-                    ULA                 =   3'b001; ////
-                    Adress_RG_Load      =   1'b0;
+                    ALU                 =   3'b001; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1; ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Sw;
+                    states = state_Sw;
                     counter = counter + 5'b00001;
                 end else if (Overflow && counter == 5'b00001) begin
                     //Erro de overflow so deve ser analisado apos o calculo
-                    states = State_Overflow;
+                    states = state_Overflow;
                     counter = 5'b00000;
                 end else if (counter == 5'b00001) begin
-                    Mux_Address         =   3'b001; ////
-                    Mux_WD_Memory       =   1'b0; ////                    
-                    Adress_RG_Load      =   1'b0;
+                    AddressCtrl         =   3'b001; ////
+                    WriteMemoSrc       =   1'b0; ////                    
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0;
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0;
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b1; ////
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b1; ////
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
 
             //J
-            State_J: begin
+            state_J: begin
                 if (counter == 5'b00000) begin
-                    Mux_PC              =   2'b11; ////
-                    Adress_RG_Load      =   1'b0;
+                    PCSource              =   2'b11; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0; 
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0; 
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b1; ////
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end
             
             //JAL
-            State_Jal: begin
+            state_Jal: begin
                 if (counter == 5'b00000) begin
-                    Mux_ALU1            =   2'b00; ////
-                    Mux_ALU2            =   2'b00; ////
-                    ULA                 =   3'b000;  ////
-                    Adress_RG_Load      =   1'b0;
+                    ALUSrcA            =   2'b00; ////
+                    ALUSrcB            =   2'b00; ////
+                    ALU                 =   3'b000;  ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0; 
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0; 
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1;  ////
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b0;
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b0;
                     PCWrite             =   1'b0;
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Jal;
+                    states = state_Jal;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
-                    Mux_PC              =   2'b11; ////
-                    Mux_WD_Registers    =   3'b010; ////
-                    Mux_WR_Registers    =   2'b10; ////
-                    Adress_RG_Load      =   1'b0;
+                    PCSource              =   2'b11; ////
+                    RegSrc    =   3'b010; ////
+                    RegDst    =   2'b10; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
-                    IR_Load             =   1'b0; 
-                    High_Load           =   1'b0;
-                    Low_Load            =   1'b0;
+                    IRWrite             =   1'b0; 
+                    writeHL            =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    Memory_WR           =   1'b0;
-                    Reg_WR              =   1'b1; ////
+                    MemWR           =   1'b0;
+                    IRWrite              =   1'b1; ////
                     PCWrite             =   1'b1; ////
-                    IsBEQ               =   1'b0;
-                    IsBNE               =   1'b0;
-                    IsBLE               =   1'b0;
+                    PCWriteCond               =   1'b0;
+                    FlagOption               =   1'b0;
+                    BranchOption               =   1'b0;
                     IsBGT               =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
 
                     //next state
-                    states = State_Fetch;
+                    states = state_Fetch;
                     counter = 5'b00000;
                 end
             end

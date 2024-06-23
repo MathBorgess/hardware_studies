@@ -1,4 +1,4 @@
-// Aqui serao inicializados todos os registrados sem funcao especial:
+// Aqui serao inicializados todos os registradores sem funcao especial:
 //          MDR, A, B, HI, LO, EPC, PC
 // Finalidade: sumarizar os componentes .v do projeto
 
@@ -294,6 +294,7 @@ module CPU (
         Shift_Left16_32_Out
 
     );
+    
     controller controller_(
 
        GT,

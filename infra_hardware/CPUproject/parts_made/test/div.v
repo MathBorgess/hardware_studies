@@ -51,13 +51,13 @@ module divider_tb;
 		// Add stimulus here
 		reset = 0;
         #100
-        a_in = 'd24;
+        a_in = ~'d24+1;
 		b_in = 'd6;
 		start = 1;
 		#100
 		start = 0;
 		#(100*n_bits)
-        $display("hi = %d, lo = %d", hi, lo);
+        $display("hi = %d, lo = %b, a_in = %b", hi, lo, a_in);
         #200
 		a_in = 'd190 ;
 		b_in = 'd13 ;

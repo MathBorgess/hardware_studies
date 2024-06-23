@@ -884,7 +884,7 @@ always @(posedge clk) begin
                 MultInit            =   1'b0;
                 DivInit             =   1'b1; ////
 
-                //inserir if divzero
+                // DivZero = 0 -> Error detection
                 if (!DivZero) begin
                     DivInit             =   1'b0;
                     states              =   state_Div0;

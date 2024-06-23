@@ -22,9 +22,7 @@ module mult (
     reg [N:0] bits;
     reg signal;
     reg signalA;
-    reg signalB;
-
-    
+    reg signalB;    
 
     always @ (posedge clk) begin
         case(multCtrl)

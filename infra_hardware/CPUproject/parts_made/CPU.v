@@ -1,6 +1,39 @@
-// Aqui serao inicializados todos os registrados sem funcao especial:
-//          MDR, A, B, HI, LO, EPC, PC
-// Finalidade: sumarizar os componentes .v do projeto
+
+//incluindo vhd's dados pelo professor
+`include "../parts_given/Registrador.vhd"
+`include "../parts_given/RegDesloc.vhd"
+`include "../parts_given/ula32.vhd"
+`include "../parts_given/Memoria.vhd"
+`include "../parts_given/Instr_Reg.vhd"
+`include "../parts_given/Banco_reg.vhd"
+
+//incluindo MUX's feitos pelo grupo
+`include "../parts_made/mux/mux_ALU_A.v"
+`include "../parts_made/mux/mux_ALU_B.v"
+`include "../parts_made/mux/mux_ALUOut.v"
+`include "../parts_made/mux/mux_divSrcA.v"
+`include "../parts_made/mux/mux_hi&lo.v"
+`include "../parts_made/mux/mux_MemAddr.v"
+`include "../parts_made/mux/mux_MemWD.v"
+`include "../parts_made/mux/mux_OptBranch.v"
+`include "../parts_made/mux/mux_OptFlag.v"
+`include "../parts_made/mux/mux_PC.v"
+`include "../parts_made/mux/mux_RegDest.v"
+`include "../parts_made/mux/mux_RegSrc.v"
+`include "../parts_made/mux/mux_ShiftN.v"
+`include "../parts_made/mux/mux_ShiftSrc.v"
+
+//incluindo os componentes feitos pelo grupo
+`include "../parts_made/concat.v"
+`include "../parts_made/control_unit.v"
+`include "../parts_made/div.v"
+`include "../parts_made/mult.v"
+`include "../parts_made/shiftLeft.v"
+`include "../parts_made/signExtend.v"
+`include "../parts_made/sizeLoad.v"
+`include "../parts_made/sizeStore.v"
+`include "../parts_made/srl.v"
+
 
 module CPU (
     input wire clk,
@@ -10,8 +43,7 @@ module CPU (
     //Control Wires Mux
     wire            mux_MemWD_selector;
     wire[2:0]       mux_MemAddr_selector;  
-    wire            mux_high_selector;
-    wire            mux_low_selector;
+    wire            mux_high_low_selector;
     wire            mux_ShiftSrc_selector;
     wire            mux_ShiftN_selector;
     wire[1:0]       mux_ALU_A_selector; 
@@ -39,6 +71,8 @@ module CPU (
 
     //Control Wires  (Outros)
     wire            Store_Size_selector;
+    wire            Flag_seletor;
+    wire            Branch_seletor;
     wire [1:0]      Load_Size_selector;
     wire [2:0]      ALU_selector;
     wire [2:0]      Shift_selector;
@@ -52,11 +86,9 @@ module CPU (
 
     //Control Wires (Mult)
     wire            MultInit;
-    wire            MultStop;
 
     //Control Wires (Div)
     wire            DivInit;
-    wire            DivStop;
     wire            DivZero;
 
     //Data Wires (Registradores)
@@ -70,6 +102,7 @@ module CPU (
     wire [31:0]     A_Out;
     wire [31:0]     B_Out;
     wire [31:0]     ALUOut_Out;
+    wire [31:0]     srl24_Out; 
 
     //Data Wires (Mux)
     wire [31:0]     mux_PC_Out;
@@ -86,6 +119,8 @@ module CPU (
     wire [4:0]      mux_N_Out;
     wire [31:0]     mux_ALU1_Out; 
     wire [31:0]     mux_ALU2_Out;  
+    wire [31:0]     mux_ALUOut_Out;  
+    wire            mux_OptFlag_Out;  
 
     //Data Wires (Outros)
     wire [31:0]     Store_Size_Out;
@@ -112,6 +147,20 @@ module CPU (
     wire [31:0]     ALU_Result;
     wire [31:0]     Shift_Left16_32_Out;
 
+    mux_opt_flag mux_OptFlag_(
+        Flag_seletor,
+        GT,
+        ZERO,
+        mux_OptFlag_Out
+    );
+
+    mux_opt_branch mux_OptBranch_(
+        Branch_seletor,
+        mux_OptFlag_Out,
+        ~mux_OptFlag_Out,
+        PC_Load
+    );
+
     Registrador PC_(
         clk,
         reset,
@@ -120,24 +169,26 @@ module CPU (
         PC_Out
     );
 
-    mux_Address mux_address_(
+    memAddr mux_address_(
         mux_Address_selector,
         PC_Out,
         ALUOut_Out,
-        mux_Address_Out
+        A_Out,
+        B_Out,
+        mux_Address_Out,
     );
 
-    mux_WD_Memory mux_wd_MEM_(
+    mux_Mem_WD mux_wd_MEM_(
         mux_MemWD_selector,
-        B_Out,
         Store_Size_Out,
+        ALUOut_Out,
         mux_WD_Memory_Out
     );
-
-    store_size store_size_(
-        Store_Size_selector,
+ 
+    SizeStore store_size_(
         MDR_Out,
         B_Out,
+        Store_Size_selector,
         Store_Size_Out
     );
 
@@ -184,67 +235,52 @@ module CPU (
         IMMEDIATE
     );
 
-
-    load_size load_size_(
-
-        Load_Size_selector,
+    SizeLoad load_size_(
         MDR_Out,
-        Load_Size_OutDown,
+        Load_Size_selector,
         Load_Size_OutUp
     );
 
-    the_box2 the_box2_(
-
+    Concat_OFFSET the_box2_(
        RS,
        RT,
        IMMEDIATE,
        The_Box2_Out
-
     );
 
-    mux_WR_Registers mux_wr_reg_(
-       
+    mux_RegDest mux_wr_reg_(
        mux_WR_Registers_selector,
        RT,
        IMMEDIATE,
        mux_WR_Registers_Out
-
     );
 
-    mux_WD_Registers mux_wd_reg_(
-
+    mux_RegSrc mux_wd_reg_(
        mux_WD_Registers_selector,
+       Sign_Extend1_32_Out,
+       RegDesloc_Out,
+       Shift_Left16_32_Out,
        Load_Size_OutUp,
        ALUOut_Out,
        Low_Out,
        High_Out,
-       RegDesloc_Out,
-       Sign_Extend1_32_Out,
-       Shift_Left16_32_Out,
        mux_WD_Registers_Out
-       
-
     );
 
-
     Registrador high_(
-
         clk,
         reset,
         High_Load,
         mux_High_Out,
         High_Out
-
     );
 
     Registrador low_(
-
         clk,
         reset,
         Low_Load,
         mux_Low_Out,
         Low_Out
-
     );
 
     Banco_reg registers_(
@@ -261,191 +297,135 @@ module CPU (
 
     );
 
-    mux_High mux_high_(
-        
-        mux_high_selector,
-        Mult_High_Out,
+    mux_hi_lo mux_high_(
+        mux_high_low_selector,
         Div_High_Out,
+        Mult_High_Out,
         mux_High_Out
-
     );
 
-    mux_Low mux_low_(
-
-        mux_low_selector,
-        Mult_Low_Out,
+    mux_hi_lo mux_low_(
+        mux_high_low_selector,
         Div_Low_Out,
+        Mult_Low_Out,
         mux_Low_Out
-
     );
 
-    mux_Extend mux_extend_(
-
-        mux_Extend_selector,
-        Load_Size_OutDown,
-        IMMEDIATE,
-        mux_Extend_Out
-
-    );
-
-    shift_left_16_32 shift_left_16_32_(
-
+    ShiftLeft_16to32 shift_left_16_32_(
         IMMEDIATE,
         Shift_Left16_32_Out
-
-    );
-    controller controller_(
-
-       GT,
-       ZERO,
-       PCWrite,
-       IsBEQ,
-       IsBNE,
-       IsBGT,
-       IsBLE,
-       PC_Load
-
-    );
-
-    mux_A mux_a_(
-
-       mux_A_selector,
-       Memory_Out,
-       Read_Data1_Out,
-       Read_Data2_Out,
-       mux_A_Out
-
-    );
-
-    mux_B mux_b_(
-
-        mux_B_selector,
-        Read_Data2_Out,
-        Memory_Out,
-        mux_B_Out
-
     );
 
     RegDesloc reg_desloc_(
-  
         clk,
         reset,
         Shift_selector,
         mux_N_Out,
         mux_Entrada_Out,
         RegDesloc_Out
-
     );
 
-    mult mult_(   
+    mult mult_(
         A_Out,
         B_Out,
         clk,
         reset,
         MultInit,
-        MultStop,
         Mult_High_Out,
         Mult_Low_Out
     );
-        
+
+    mux_divSrcA mux_divSrcA_(
+        DivOp,
+        MDR_Out,
+        A_Out,
+        mux_A_Out
+    );
 
     div div_(
-        A_Out,
+        mux_A_Out,
         B_Out,
         clk,
-        DivInit,
-        DivStop,
         reset,
+        DivInit,
         DivZero,
         Div_High_Out,
         Div_Low_Out
-
     );
 
-    sign_extend sign_extend_(
-
-        mux_Extend_Out,
+    SignExtend sign_extend_(
+        IMMEDIATE,
         Sign_Extend16_32_Out
-
     );
 
     Registrador A_(
-
         clk,
         reset,
         A_Load,
         mux_A_Out,
         A_Out
-
     );
 
      Registrador B_(
-
         clk,
         reset,
         B_Load,
         mux_B_Out,
         B_Out
-
     );
 
-    mux_Entrada mux_entrada_(
-
+    mux_Shift_Src mux_entrada_(
         mux_Entrada_selector,
         A_Out,
         B_Out,
         mux_Entrada_Out
-
     );
 
-    mux_N mux_n_(
-
+    mux_Shift_n mux_n_(
         mux_N_selector,
         B_Out,
         IMMEDIATE,
         mux_N_Out
-
     );
 
-    shift_left32_32 shift_left32_32_(
-
+    ShiftLeft_32to32 shift_left32_32_(
         Sign_Extend16_32_Out,
         Shift_Left32_32_Out
-
     );
 
-    shift_left26_28 shift_left26_28_(
-
+    ShiftLeft_26to28 shift_left26_28_(
         The_Box2_Out,
         Shift_Left26_28_Out
-
     );
 
-    mux_ALU1 mux_ALU1_(
+    ShiftRightLogical_24times srl24(
+        Memory_Out,
+        srl24_Out
+    );
 
+    mux_ALU_A mux_ALU1_(
         mux_ALU1_selector,
         PC_Out,
         A_Out,
+        ~A_Out,
+        srl24_Out,
         mux_ALU1_Out
-
     );
 
-    mux_ALU2 mux_ALU2_(
-
+    mux_ALU_B mux_ALU2_(
         mux_ALU2_selector,
         B_Out,
+        32'd4,
         Sign_Extend16_32_Out,
         Shift_Left32_32_Out,
+        ~B_Out,
         mux_ALU2_Out
-
     );
 
-    the_box the_box_(
-
+    Concat_JumpPC the_box_(
         Shift_Left26_28_Out,
         PC_Out,
         The_Box_Out
-
     );
 
     ula32 ALU_(
@@ -460,40 +440,38 @@ module CPU (
         EQUAL,
         GT,
         LESS
-
     );
 
-
-    sign_extend1_32 sign_extend1_32_(
-
+    ShiftRightLogical_1to32 sign_extend1_32_(
         LESS,
         Sign_Extend1_32_Out
+    );
 
+    mux_ALUOUT mux_ALUOut_(
+        mux_ALU_Out_selector,
+        Memory_Out,
+        ALU_Result,
+        mux_ALUOut_Out
     );
 
     Registrador ALUOut_(
-
         clk,
         reset,
         ALUOut_Load,
         ALU_Result,
         ALUOut_Out
-
     );
 
     mux_PC mux_PC_(
-
         mux_PC_selector,
-        EPC_Out,
         ALU_Result,
-        ALUOut_Out,
         The_Box_Out,
+        ALUOut_Out,
+        EPC_Out,
         mux_PC_Out
-
     );
 
-    Unid_Control unid_control_(
-
+    Control_Unit control_unit(
         clk,
         reset,
         OPCODE,

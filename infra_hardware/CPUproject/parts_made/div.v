@@ -35,6 +35,9 @@ module div (
 			currDigit=5'd31;
 			cycleCount=5'b0;
 			divRun = 0;
+            divZero = 1;
+            hi=32'b0;
+			lo=32'b0;
 		end
         else if(divCtrl) begin
             if(srcB == 32'b0) begin
@@ -45,9 +48,12 @@ module div (
                 denominator = srcB;
                 remainder = 32'b0;
                 quotient = 32'b0;
-                divRun = 1;
+                divRun = 1'b1;
+                divZero = 1'b1;
                 currDigit = 5'd31;
                 cycleCount = 5'b0;
+                hi=32'b0;
+			    lo=32'b0;
             end
         end
         else if(!divCtrl & divRun) begin 

@@ -22,7 +22,7 @@
 */
 
 
-module Unid_Control (
+module Control_Unit (
 
 //INPUT PORTS
 input wire          clk,
@@ -194,7 +194,7 @@ always @(posedge clk) begin
         EPC_Load            =   1'b0;
         MDR_Load            =   1'b0;
         IRWrite             =   1'b0;
-        writeHL            =   1'b0;
+        writeHL             =   1'b0;
         A_Load              =   1'b0;
         B_Load              =   1'b0;
         ALUOut_Load         =   1'b0;
@@ -209,8 +209,28 @@ always @(posedge clk) begin
         states = state_Fetch;
         counter = 5'b00000;
     end else begin
+        AddressCtrl         =   3'b000;
+        ALUSrcA             =   2'b00; 
+        ALUSrcB             =   3'b000; 
+        ALU                 =   3'b00;
+        MDR_Load            =   1'b0;
+        EPC_Load            =   1'b0;
+        IRWrite             =   1'b0;
+        writeHL             =   1'b0;
+        A_Load              =   1'b0;
+        B_Load              =   1'b0;
+        ALUOut_Load         =   1'b0;
+        MemWR               =   1'b0;
+        IRWrite             =   1'b0;
+        PCWrite             =   1'b0;
+        PCWriteCond         =   1'b0;
+        FlagOption          =   1'b0;
+        BranchOption        =   1'b0;
+        
+        MultInit            =   1'b0;
+        DivInit             =   1'b0;
         case (states) //descobrir qual estado se esta para tornar o output adequado
-            //FETCH
+            //FETCH - revised
             state_Fetch: begin
                 if (counter == 5'b00000 || counter == 5'b00001) begin
                     AddressCtrl         =   3'b000; ///
@@ -220,7 +240,7 @@ always @(posedge clk) begin
                     MDR_Load            =   1'b0;
                     EPC_Load            =   1'b0;
                     IRWrite             =   1'b0;
-                    writeHL            =   1'b0;
+                    writeHL             =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b1;
@@ -265,7 +285,7 @@ always @(posedge clk) begin
                     end
             end 
 
-            //DECODE
+            //DECODE - revised
             state_Decode: begin
                 ALUSrcA             =   2'b00; ////
                 ALUSrcB             =   2'b11; ////
@@ -373,9 +393,14 @@ always @(posedge clk) begin
                                 states = state_RTE;
                             end
 
-                            //Funct ADDM  
-                            Funct_Addm: begin
+                            //Funct OR
+                            Funct_Or: begin
                                 states = state_Or;
+                            end
+
+                            //Funct XCHG
+                            Funct_Xchg: begin
+                                states = state_Xchg;
                             end
 
                             default: //erro de opcode
@@ -413,9 +438,9 @@ always @(posedge clk) begin
                         states = state_Bgt;
                     end
 
-                    //Op SLLM
-                    Op_Sllm: begin
-                        states = state_Sllm;
+                    //Op Divm
+                    Op_Divm: begin
+                        states = state_Divm;
                     end
 
                     //Op LB
@@ -971,24 +996,24 @@ always @(posedge clk) begin
                 end 
             end
 
-            //MFHI
+            //MFHI - revised
             state_Mfhi: begin
                 if (counter == 5'b00000) begin
-                    RegDst    =   2'b11; ////
-                    RegSrc    =   3'b100; ////
+                    RegDst              =   2'b11; ////
+                    RegSrc              =   3'b111; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
                     IRWrite             =   1'b0;
-                    writeHL            =   1'b0;
+                    writeHL             =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    MemWR           =   1'b0;
-                    IRWrite              =   1'b1; ////
+                    MemWR               =   1'b0;
+                    RegWrite            =   1'b1; ////
                     PCWrite             =   1'b0;
-                    PCWriteCond               =   1'b0;
-                    FlagOption               =   1'b0;
-                    BranchOption               =   1'b0;
+                    PCWriteCond         =   1'b0;
+                    FlagOption          =   1'b0;
+                    BranchOption        =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;
@@ -999,24 +1024,24 @@ always @(posedge clk) begin
                 end
             end
 
-            //MFLO
+            //MFLO - revised
             state_Mflo: begin
                 if (counter == 5'b00000) begin
-                    RegDst    =   2'b11; ////
-                    RegSrc    =   3'b011; ////
+                    RegDst              =   2'b11; ////
+                    RegSrc              =   3'b110; ////
                     EPC_Load            =   1'b0;
                     MDR_Load            =   1'b0;
                     IRWrite             =   1'b0;
-                    writeHL            =   1'b0;
+                    writeHL             =   1'b0;
                     A_Load              =   1'b0;
                     B_Load              =   1'b0;
                     ALUOut_Load         =   1'b0;
-                    MemWR           =   1'b0;
-                    IRWrite              =   1'b1; ////
+                    MemWR               =   1'b0;
+                    RegWrite            =   1'b1; ////
                     PCWrite             =   1'b0;
-                    PCWriteCond               =   1'b0;
-                    FlagOption               =   1'b0;
-                    BranchOption               =   1'b0;
+                    PCWriteCond         =   1'b0;
+                    FlagOption          =   1'b0;
+                    BranchOption        =   1'b0;
                     
                     MultInit            =   1'b0;
                     DivInit             =   1'b0;

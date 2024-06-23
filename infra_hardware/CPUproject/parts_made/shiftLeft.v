@@ -12,7 +12,7 @@ module ShiftLeft_26to28 (
     assign data_out = {data_in, 2'b0};
 endmodule
 
-module ShiftLeft2_32to32 (
+module ShiftLeft_32to32 (
     input [31:0] data_in,
     output [31:0] data_out
 );

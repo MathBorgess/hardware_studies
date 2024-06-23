@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-// Aqui serao inicializados todos os registradores sem funcao especial:
-//          MDR, A, B, HI, LO, EPC, PC
-// Finalidade: sumarizar os componentes .v do projeto
-=======
 
 //incluindo vhd's dados pelo professor
 `include "../parts_given/Registrador.vhd"
@@ -39,7 +34,6 @@
 `include "../parts_made/sizeStore.v"
 `include "../parts_made/srl.v"
 
->>>>>>> 65309e04843cdcb69003a133205ede1139b1e88a
 
 module CPU (
     input wire clk,

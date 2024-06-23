@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-// Aqui serao inicializados todos os registradores sem funcao especial:
-//          MDR, A, B, HI, LO, EPC, PC
-// Finalidade: sumarizar os componentes .v do projeto
-=======
 
 //incluindo vhd's dados pelo professor
 `include "../parts_given/Registrador.vhd"
@@ -39,7 +34,6 @@
 `include "../parts_made/sizeStore.v"
 `include "../parts_made/srl.v"
 
->>>>>>> 65309e04843cdcb69003a133205ede1139b1e88a
 
 module CPU (
     input wire clk,
@@ -320,39 +314,6 @@ module CPU (
     ShiftLeft_16to32 shift_left_16_32_(
         IMMEDIATE,
         Shift_Left16_32_Out
-
-    );
-    
-    controller controller_(
-
-       GT,
-       ZERO,
-       PCWrite,
-       IsBEQ,
-       IsBNE,
-       IsBGT,
-       IsBLE,
-       PC_Load
-
-    );
-
-    mux_A mux_a_(
-
-       mux_A_selector,
-       Memory_Out,
-       Read_Data1_Out,
-       Read_Data2_Out,
-       mux_A_Out
-
-    );
-
-    mux_B mux_b_(
-
-        mux_B_selector,
-        Read_Data2_Out,
-        Memory_Out,
-        mux_B_Out
-
     );
 
     RegDesloc reg_desloc_(

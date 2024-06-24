@@ -52,9 +52,9 @@ module CPU (
     wire[1:0]       mux_PC_selector;
     wire[1:0]       mux_WR_Registers_selector;
     wire[2:0]       mux_WD_Registers_selector;
+    wire            mux_divSrcA_selector;
 
     //Control Wires Single Register 
-    wire            PC_Load;
     wire            EPC_Load;
     wire            MDR_Load;
     wire            IR_Load;
@@ -89,6 +89,7 @@ module CPU (
     //Control Wires (Div)
     wire            DivInit;
     wire            DivZero;
+    wire            DivOp;
 
     //Data Wires (Registradores)
     wire [31:0]     PC_Out;
@@ -117,7 +118,8 @@ module CPU (
     wire [31:0]     mux_ALU1_Out; 
     wire [31:0]     mux_ALU2_Out;  
     wire [31:0]     mux_ALUOut_Out;  
-    wire            mux_OptFlag_Out;  
+    wire            mux_OptFlag_Out;
+    wire            mux_OptBranch_Out;  
 
     //Data Wires (Outros)
     wire [31:0]     Store_Size_Out;
@@ -144,22 +146,22 @@ module CPU (
     wire [31:0]     Shift_Left16_32_Out;
 
     mux_opt_flag mux_OptFlag_(
-        Flag_seletor,
+        Flag_selector,
         GT,
         ZERO,
         mux_OptFlag_Out
     );
 
     mux_opt_branch mux_OptBranch_(
-        Branch_seletor,
+        Branch_selector,
         mux_OptFlag_Out,
-        PC_Load
+        mux_OptBranch_Out
     );
 
     Registrador PC_(
         clk,
         reset,
-        PC_Load,
+        PcWrite || (PCWriteCond && mux_OptBranch_Out), // PC_Load
         mux_PC_Out,
         PC_Out
     );
@@ -185,13 +187,6 @@ module CPU (
         B_Out,
         Store_Size_selector,
         Store_Size_Out
-    );
-
-    Registrador address_RG_(
-        clk,
-        reset,
-        Address_RG_Load,
-        PC_Out
     );
 
     Memoria MEM_(
@@ -468,24 +463,23 @@ module CPU (
         IMMEDIATE,
         OVERFLOW,
         Zero_Div,
-        MultStop,
-        DivStop,
         DivZero,
 
         mux_MemWD_selector,
+        mux_divSrcA_selector;
         mux_high_low_selector,
+        mux_ALU_Out_selector
         mux_ShiftSrc_selector,
         mux_ShiftN_selector,
 
         mux_ALU_A_selector,            
-        mux_ALU_B_selector,            
         mux_PC_selector,              
         mux_WR_Registers_selector,    
-
+        
+        mux_ALU_B_selector,            
         mux_MemAddr_selector,         
         mux_WD_Registers_selector,    
 
-        Address_RG_Load,
         EPC_Load,
         MDR_Load,
         IR_Load,
@@ -494,15 +488,15 @@ module CPU (
         B_Load,
         ALUOut_Load,
 
+        Reg_WR,
         Store_Size_selector,
         Load_Size_selector,
         Memory_WR,
-        Reg_WR,
 
         PCWrite,
         PCWriteCond,
-        FlagOption,
-        BranchOption,
+        Flag_selector,
+        Branch_selector,
 
         ALU_selector,
         Shift_selector,

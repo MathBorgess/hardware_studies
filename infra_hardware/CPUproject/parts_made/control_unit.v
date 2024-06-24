@@ -1,27 +1,3 @@
-/* TODO'S:
-    X 1. Listar entradas 
-    X 2. Listar as saidas por tipo de mux (num. de entradas por mux)
-    X 3. " saidas para registradores
-    X 4. " saidas para componentes fornecidos
-    X 5. " saidas para componentes criados
-    X 6.  Definir parametros e variaveis para controlar os estados de cada OpCode
-    7. Logica de estados para IF e ID
-    8. Logica de estados por OpCode
-        8.1 Logica de estados de excecao (OBS.: Overflow tmb incluido em shift's)
-    10. 
-    9. Revisar 7 e 8 ate ter certeza
-
-    10. Revisitar estados de OVERFLOW, OPCODE 404 e DIV0
-*/
-
-/*
-    Faltam os estados das instruções:
-    X 1. xchg rs, rt
-    X 2. divm rt, offset(rs)
-    X 3. or rd, rs, rt
-*/
-
-
 module Control_Unit (
 
 //INPUT PORTS

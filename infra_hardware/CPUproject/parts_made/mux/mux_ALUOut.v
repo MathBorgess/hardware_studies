@@ -2,7 +2,7 @@ module mux_ALUOUT (
     input wire [1:0] sel,
     input wire [31:0] data_0,
     input wire [31:0] data_1,
-    output wire [31:0] data_out
+    output reg [31:0] data_out
 );
     wire [31:0] notValue = ~data_1;
     always @(sel) begin

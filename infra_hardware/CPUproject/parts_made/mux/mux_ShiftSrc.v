@@ -2,7 +2,7 @@ module mux_Shift_Src (
     input wire         sel,
     input wire  [31:0] data_0, //vem do A 
     input wire  [31:0] data_1, // vem do B 
-    output wire [31:0] data_out
+    output reg [31:0] data_out
 );
     always @(sel) begin
         case (sel)

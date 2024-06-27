@@ -3,7 +3,7 @@ module mux_ALU_A (
     input wire [31:0] data_0,
     input wire [31:0] data_1,
     input wire [31:0] data_3,
-    output wire [31:0] data_out
+    output reg [31:0] data_out
 );
     wire [31:0] notA = ~data_1;
     always @(sel) begin

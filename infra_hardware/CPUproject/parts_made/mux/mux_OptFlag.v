@@ -2,7 +2,7 @@ module mux_opt_flag (
     input wire sel,
     input wire  data_0, // flag GT 
     input wire  data_1, // flag 0 
-    output wire data_out
+    output reg data_out
 );
 
     always @(sel) begin

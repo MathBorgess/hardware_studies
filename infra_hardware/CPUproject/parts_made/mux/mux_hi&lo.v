@@ -2,7 +2,7 @@ module mux_hi_lo (
     input wire sel,
     input wire [31:0] data_0,
     input wire [31:0] data_1,
-    output wire [31:0] data_out
+    output reg [31:0] data_out
 );
     always @(sel) begin
         case (sel)

@@ -4,7 +4,7 @@ module mux_PC (
     input wire  [31:0] data_1,
     input wire  [31:0] data_2,
     input wire  [31:0] data_3,
-    output wire [31:0] data_out
+    output reg [31:0] data_out
 );
     always @(sel) begin
         case (sel)

@@ -12,7 +12,6 @@ input wire          DivZero,
 //Muxs (até 2 entradas)
 output reg          WriteMemoSrc,
 output reg          DivOp,
-output reg          writeHL,
 output reg          HLSrc,
 output reg          ALUOutSrc,
 output reg          ShiftSrc,
@@ -40,7 +39,7 @@ output reg          ALUOut_Load,
 //Write and Read Controllers
 output reg          RegWrite,
 output reg          StoreSizeCtrl,
-output reg [1:0]    LStoreSizeCtrl,
+output reg [1:0]    LoadSizeCtrl,
 output reg          MemWR,
 
 //Controlador Controllers
@@ -163,7 +162,7 @@ end
 
 always @(posedge clk) begin
     //RESET
-    if ((Reset_In == 1'b1) || state == state_Reset) begin
+    if ((Reset_In == 1'b1) || states == state_Reset) begin
         RegDst              =   2'b10;  
         RegSrc              =   3'b000; 
         RegWrite            =   1'b1; 
@@ -196,7 +195,7 @@ always @(posedge clk) begin
         PCWriteCond         =   1'b0;
         FlagOption          =   1'b0;
         BranchOption        =   1'b0;
-        Flagption           =   1'b0;
+        FlagOption          =   1'b0;
         EPC_Load            =   1'b0;
         MDR_Load            =   1'b0;
         IRWrite             =   1'b0;
@@ -223,7 +222,6 @@ always @(posedge clk) begin
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00010) begin //IR Write State
                     PCSource            =   2'b00;
-                    PC_Load             =   1'b1;
                     IRWrite             =   1'b1;
                     PCWrite             =   1'b1;
 
@@ -439,23 +437,24 @@ always @(posedge clk) begin
 
             //OVERFLOW
             state_Overflow: begin
-                if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
-                    AddressCtrl         =   3'b011; ////
+                if (counter == 5'b00000) begin
+                    AddressCtrl         =   3'b011; //// 254
+                    MemWR               =   1'b0; ////
                     ALUSrcA             =   2'b00; ////
                     ALUSrcB             =   2'b01; ////
                     ALU                 =   3'b010; ////
+                    EPC_Load            =   1'b1; ////
+
+                    //next state
+                    states = state_Overflow;
+                    counter = counter + 5'b00001;
+                end else if (counter == 5'b00001) begin
+                    EPC_Load            =   1'b0; ////
 
                     //next state
                     states = state_Overflow;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00011) begin
-                    EPC_Load            =   1'b1; ////
-                    MDR_Load            =   1'b1; ////
-
-                    //next state
-                    states = state_Overflow;
-                    counter = counter + 5'b00001;
-                end else if (counter == 5'b00100) begin
                     ALUSrcA            =   2'b11; ////
                     PCSource           =   2'b00; ////
                     ALU                =   3'b000; ////
@@ -758,8 +757,8 @@ always @(posedge clk) begin
             //SRA
             state_Sra: begin
                 if (counter == 5'b00000) begin//AQUI
-                    ShiftSrc         =   1'b1; ////
-                    ShiftAmt               =   1'b1; ////
+                    ShiftSrc            =   1'b1; ////
+                    ShiftAmt            =   1'b1; ////
                     Shift               =   3'b001; ////
 
                     //next state
@@ -930,7 +929,7 @@ always @(posedge clk) begin
                     //next state
                     states = state_Xchg;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b001010) begin
+                end else if (counter == 5'b01010) begin
                     AddressCtrl         =   3'b101; ////
                     MemWR               =   1'b1; ////
                     WriteMemoSrc        =   1'b0; ////
@@ -1125,7 +1124,7 @@ always @(posedge clk) begin
                     states = state_Lb;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    LStoreSizeCtrl         =   2'b10; ////
+                    LoadSizeCtrl         =   2'b10; ////
                     RegDst                 =   2'b00; ////
                     RegSrc                 =   3'b010; ////
                     RegWrite               =   1'b1; ////
@@ -1164,7 +1163,7 @@ always @(posedge clk) begin
                     states = state_Lh;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    LStoreSizeCtrl         =   2'b01; ////
+                    LoadSizeCtrl         =   2'b01; ////
                     RegDst                 =   2'b00; ////
                     RegSrc                 =   3'b010; ////
                     RegWrite               =   1'b1; ////
@@ -1216,7 +1215,7 @@ always @(posedge clk) begin
                     states = state_Lw;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    LStoreSizeCtrl         =   2'b00; ////
+                    LoadSizeCtrl         =   2'b00; ////
                     RegDst                 =   2'b00; ////
                     RegSrc                 =   3'b010; ////
                     RegWrite               =   1'b1; ////

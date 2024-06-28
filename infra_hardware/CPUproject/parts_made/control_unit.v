@@ -225,6 +225,7 @@ always @(posedge clk) begin
                     PCSource            =   2'b00;
                     IRWrite             =   1'b1;
                     PCWrite             =   1'b1;
+                    MDR_Load            =   1'b1;
 
                     //next state
                     states = state_Decode;

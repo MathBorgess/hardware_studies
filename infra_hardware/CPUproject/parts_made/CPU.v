@@ -1,11 +1,11 @@
 
 //incluindo vhd's dados pelo professor
-`include "../parts_given/Registrador.vhd"
-`include "../parts_given/RegDesloc.vhd"
-`include "../parts_given/ula32.vhd"
-`include "../parts_given/Memoria.vhd"
-`include "../parts_given/Instr_Reg.vhd"
-`include "../parts_given/Banco_reg.vhd"
+// `include "../parts_given/Registrador.vhd"
+// `include "../parts_given/RegDesloc.vhd"
+// `include "../parts_given/ula32.vhd"
+// `include "../parts_given/Memoria.vhd"
+// `include "../parts_given/Instr_Reg.vhd"
+// `include "../parts_given/Banco_reg.vhd"
 
 //incluindo MUX's feitos pelo grupo
 `include "../parts_made/mux/mux_ALU_A.v"
@@ -462,13 +462,12 @@ module CPU (
         OPCODE,
         IMMEDIATE,
         OVERFLOW,
-        Zero_Div,
         DivZero,
 
         mux_MemWD_selector,
-        mux_divSrcA_selector;
+        mux_divSrcA_selector,
         mux_high_low_selector,
-        mux_ALU_Out_selector
+        mux_ALU_Out_selector,
         mux_ShiftSrc_selector,
         mux_ShiftN_selector,
 

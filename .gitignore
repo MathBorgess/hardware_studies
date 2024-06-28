@@ -1,3 +1,6 @@
 *.vvp
 *.out
 *.vcd
+*.mpf
+work_lib/
+infra_hardware/CPUproject/transcript

@@ -1,7 +1,7 @@
 module mux_opt_branch (
     input wire  sel,
     input wire  data_0, // from flag option
-    output wire data_out
+    output reg data_out
 
 );
     always @(sel) begin

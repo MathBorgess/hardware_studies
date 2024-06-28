@@ -2,7 +2,7 @@ module SizeStore (
     input [31:0] data_in_MDR, 
     input [31:0] data_in_B, 
     input [1:0] SizeCtrl,
-    output [31:0] data_out
+    output reg [31:0] data_out
 );
 
 /*

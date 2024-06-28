@@ -7,7 +7,7 @@ module mux_RegSrc (
     input wire [31:0] data_5,
     input wire [31:0] data_6,
     input wire [31:0] data_7,
-    output wire [31:0] data_out
+    output reg [31:0] data_out
 );
 
     always @(sel) begin

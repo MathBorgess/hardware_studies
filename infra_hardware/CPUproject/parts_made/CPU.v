@@ -172,7 +172,7 @@ module CPU (
         ALUOut_Out,
         A_Out,
         B_Out,
-        mux_Address_Out,
+        mux_Address_Out
     );
 
     mux_Mem_WD mux_wd_MEM_(
@@ -209,6 +209,7 @@ module CPU (
         clk,
         reset,
         EPC_Load,
+        ALU_Result,
         EPC_Out
     );
 
@@ -226,13 +227,13 @@ module CPU (
     SizeLoad load_size_(
         MDR_Out,
         Load_Size_selector,
-        Load_Size_OutUp
+        Load_Size_Out
     );
 
     Concat_OFFSET the_box2_(
-       RS,
-       RT,
        IMMEDIATE,
+       RT,
+       RS,
        The_Box2_Out
     );
 
@@ -248,7 +249,7 @@ module CPU (
        Sign_Extend1_32_Out,
        RegDesloc_Out,
        Shift_Left16_32_Out,
-       Load_Size_OutUp,
+       Load_Size_Out,
        ALUOut_Out,
        Low_Out,
        High_Out,
@@ -409,7 +410,7 @@ module CPU (
 
     Concat_JumpPC the_box_(
         Shift_Left26_28_Out,
-        PC_Out,
+        PC_Out[31:28],
         The_Box_Out
     );
 

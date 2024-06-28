@@ -13,7 +13,7 @@ input wire          DivZero,
 output reg          WriteMemoSrc,
 output reg          DivOp,
 output reg          HLSrc,
-output reg          ALUOutSrc,
+output reg [1:0]    ALUOutSrc,
 output reg          ShiftSrc,
 output reg          ShiftAmt,
 
@@ -38,7 +38,7 @@ output reg          ALUOut_Load,
 
 //Write and Read Controllers
 output reg          RegWrite,
-output reg          StoreSizeCtrl,
+output reg [1:0]    StoreSizeCtrl,
 output reg [1:0]    LoadSizeCtrl,
 output reg          MemWR,
 
@@ -174,7 +174,7 @@ always @(posedge clk) begin
         B_Load              =   1'b0;
         ALUOut_Load         =   1'b0;
         MemWR               =   1'b0;
-        IRWrite             =   1'b1;        
+        IRWrite             =   1'b0;        
         PCWrite             =   1'b0;
         PCWriteCond         =   1'b0;
         FlagOption          =   1'b0;

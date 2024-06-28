@@ -166,6 +166,7 @@ always @(posedge clk) begin
         RegDst              =   2'b10;  
         RegSrc              =   3'b000; 
         RegWrite            =   1'b1; 
+        
         EPC_Load            =   1'b0;
         MDR_Load            =   1'b0;
         IRWrite             =   1'b0;
@@ -173,12 +174,19 @@ always @(posedge clk) begin
         A_Load              =   1'b0;
         B_Load              =   1'b0;
         ALUOut_Load         =   1'b0;
+        AddressCtrl         =   3'b000;
+        ALUSrcA             =   2'b00; 
+        ALUSrcB             =   3'b000;
+        ALUOutSrc           =   2'b01;
+        ALU                 =   3'b00;
         MemWR               =   1'b0;
         IRWrite             =   1'b0;        
         PCWrite             =   1'b0;
         PCWriteCond         =   1'b0;
         FlagOption          =   1'b0;
         BranchOption        =   1'b0;
+        MultInit            =   1'b0;
+        DivInit             =   1'b0;
 
         //next state
         states = state_Fetch;
@@ -202,7 +210,6 @@ always @(posedge clk) begin
         writeHL             =   1'b0;
         A_Load              =   1'b0;
         B_Load              =   1'b0;
-        ALUOut_Load         =   1'b0;
         
         MultInit            =   1'b0;
         DivInit             =   1'b0;
@@ -212,7 +219,7 @@ always @(posedge clk) begin
                 if (counter == 5'b00000 || counter == 5'b00001) begin
                     AddressCtrl         =   3'b000;
                     ALUSrcA             =   2'b00; 
-                    ALUSrcB             =   2'b01; 
+                    ALUSrcB             =   3'b001; 
                     ALU                 =   3'b001;
                     ALUOut_Load         =   1'b1;
                     MemWR               =   1'b0;
@@ -236,7 +243,7 @@ always @(posedge clk) begin
             //DECODE
             state_Decode: begin
                 ALUSrcA             =   2'b00;
-                ALUSrcB             =   2'b11;
+                ALUSrcB             =   3'b011;
                 ALU                 =   3'b001;
                 ALUOut_Load         =   1'b1;
                 A_Load              =   1'b1;
@@ -443,7 +450,7 @@ always @(posedge clk) begin
                     AddressCtrl         =   3'b011; //// 254
                     MemWR               =   1'b0; ////
                     ALUSrcA             =   2'b00; ////
-                    ALUSrcB             =   2'b01; ////
+                    ALUSrcB             =   3'b001; ////
                     ALU                 =   3'b010; ////
                     EPC_Load            =   1'b1; ////
 
@@ -473,7 +480,7 @@ always @(posedge clk) begin
                 if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
                     AddressCtrl         =   3'b010; ////
                     ALUSrcA             =   2'b00; ////
-                    ALUSrcB             =   2'b01; ////
+                    ALUSrcB             =   3'b001; ////
                     ALU                 =   3'b010; ////
 
                     //next state
@@ -503,7 +510,7 @@ always @(posedge clk) begin
                 if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
                     AddressCtrl         =   3'b100; ////
                     ALUSrcA             =   2'b00; ////
-                    ALUSrcB             =   2'b01; ////
+                    ALUSrcB             =   3'b001; ////
                     ALU                 =   3'b010; ////
 
                     //next state

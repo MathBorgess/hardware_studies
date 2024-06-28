@@ -162,7 +162,7 @@ module CPU (
 
     PCLoadBox PC_LoadBox_(
         PCWrite,
-        PCWriteCond
+        PCWriteCond,
         mux_OptBranch_Out,
         PC_Load
     );

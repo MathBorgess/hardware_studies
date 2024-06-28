@@ -640,6 +640,7 @@ always @(posedge clk) begin
                 end else if (counter == 5'b11111) begin
                     writeHL = 1'b1;
                     states = state_Fetch;
+                    counter = 5'b00000;
                 end else begin
                     states = state_MultDivRun;
                     counter = counter + 5'b00001;

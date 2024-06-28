@@ -12,7 +12,6 @@ input wire          DivZero,
 //Muxs (até 2 entradas)
 output reg          WriteMemoSrc,
 output reg          DivOp,
-output reg          writeHL,
 output reg          HLSrc,
 output reg          ALUOutSrc,
 output reg          ShiftSrc,
@@ -39,8 +38,8 @@ output reg          ALUOut_Load,
 
 //Write and Read Controllers
 output reg          RegWrite,
-output reg          StoreSizeCtrl,
-output reg [1:0]    LStoreSizeCtrl,
+output reg [1:0]    StoreSizeCtrl,
+output reg [1:0]    LoadSizeCtrl,
 output reg          MemWR,
 
 //Controlador Controllers
@@ -1125,7 +1124,7 @@ always @(posedge clk) begin
                     states = state_Lb;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    LStoreSizeCtrl         =   2'b10; ////
+                    LoadSizeCtrl         =   2'b10; ////
                     RegDst                 =   2'b00; ////
                     RegSrc                 =   3'b010; ////
                     RegWrite               =   1'b1; ////
@@ -1164,7 +1163,7 @@ always @(posedge clk) begin
                     states = state_Lh;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    LStoreSizeCtrl         =   2'b01; ////
+                    LoadSizeCtrl         =   2'b01; ////
                     RegDst                 =   2'b00; ////
                     RegSrc                 =   3'b010; ////
                     RegWrite               =   1'b1; ////
@@ -1216,7 +1215,7 @@ always @(posedge clk) begin
                     states = state_Lw;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
-                    LStoreSizeCtrl         =   2'b00; ////
+                    LoadSizeCtrl         =   2'b00; ////
                     RegDst                 =   2'b00; ////
                     RegSrc                 =   3'b010; ////
                     RegWrite               =   1'b1; ////

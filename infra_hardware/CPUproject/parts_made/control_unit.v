@@ -166,7 +166,7 @@ always @(posedge clk) begin
         RegDst              =   2'b10;  
         RegSrc              =   3'b000; 
         RegWrite            =   1'b1; 
-        
+
         EPC_Load            =   1'b0;
         MDR_Load            =   1'b0;
         IRWrite             =   1'b0;
@@ -973,6 +973,10 @@ always @(posedge clk) begin
                     RegSrc                =   3'b101; ////
                     RegWrite              =   1'b1; ////
                     
+                    ALUSrcA             =   2'b01; ////
+                    ALUSrcB             =   3'b010; ////
+                    ALU                 =   3'b001; ////
+
                     //next state
                     states = state_Fetch;
                     counter = 5'b00000;

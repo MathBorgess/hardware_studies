@@ -113,8 +113,7 @@ module CPU (
     wire [31:0]     mux_WD_Registers_Out;
     wire [31:0]     mux_High_Out;
     wire [31:0]     mux_Low_Out;
-    wire [31:0]     mux_A_Out;
-    wire [31:0]     mux_B_Out;
+    wire [31:0]     mux_divA_Out;
     wire [31:0]     mux_ShiftSrc_Out;
     wire [4:0]      mux_ShiftN_Out;
     wire [31:0]     mux_ALU1_Out; 
@@ -337,11 +336,11 @@ module CPU (
         DivOp,
         MDR_Out,
         A_Out,
-        mux_A_Out
+        mux_divA_Out
     );
 
     div div_(
-        mux_A_Out,
+        mux_divA_Out,
         B_Out,
         clk,
         reset,
@@ -360,7 +359,7 @@ module CPU (
         clk,
         reset,
         A_Load,
-        mux_A_Out,
+        Read_Data1_Out,
         A_Out
     );
 
@@ -368,7 +367,7 @@ module CPU (
         clk,
         reset,
         B_Load,
-        mux_B_Out,
+        Read_Data2_Out,
         B_Out
     );
 

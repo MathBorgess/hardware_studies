@@ -216,6 +216,7 @@ always @(posedge clk) begin
                     ALU                 =   3'b001;
                     ALUOut_Load         =   1'b1;
                     MemWR               =   1'b0;
+                    MDR_Load            =   1'b1;
 
                     //next state
                     states = state_Fetch;

@@ -33,6 +33,7 @@
 `include "../parts_made/sizeLoad.v"
 `include "../parts_made/sizeStore.v"
 `include "../parts_made/srl.v"
+`include "../parts_made/PCLoadBox.v"
 
 
 module CPU (
@@ -56,6 +57,7 @@ module CPU (
 
     //Control Wires Single Register 
     wire            EPC_Load;
+    wire            PC_Load;
     wire            MDR_Load;
     wire            IR_Load;
     wire            HL_Load;
@@ -158,10 +160,17 @@ module CPU (
         mux_OptBranch_Out
     );
 
+    PCLoadBox PC_LoadBox_(
+        PCWrite,
+        PCWriteCond
+        mux_OptBranch_Out,
+        PC_Load
+    );
+
     Registrador PC_(
         clk,
         reset,
-        PcWrite || (PCWriteCond && mux_OptBranch_Out), // PC_Load
+        PC_Load, // PC_Load
         mux_PC_Out,
         PC_Out
     );

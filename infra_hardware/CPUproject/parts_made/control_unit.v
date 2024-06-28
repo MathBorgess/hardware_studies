@@ -176,7 +176,7 @@ always @(posedge clk) begin
         ALUOut_Load         =   1'b0;
         AddressCtrl         =   3'b000;
         ALUSrcA             =   2'b00; 
-        ALUSrcB             =   3'b000;
+        ALUSrcB             =   3'b001;
         ALUOutSrc           =   2'b01;
         ALU                 =   3'b00;
         MemWR               =   1'b0;
@@ -194,9 +194,9 @@ always @(posedge clk) begin
     end else begin
         AddressCtrl         =   3'b000;
         ALUSrcA             =   2'b00; 
-        ALUSrcB             =   3'b000;
+        ALUSrcB             =   3'b001;
         ALUOutSrc           =   2'b01;
-        ALU                 =   3'b00;
+        ALU                 =   3'b001;
         ALUOut_Load         =   1'b0;
         MemWR               =   1'b0;
         PCWrite             =   1'b0;
@@ -972,7 +972,7 @@ always @(posedge clk) begin
                     RegDst                =   2'b00; ////
                     RegSrc                =   3'b101; ////
                     RegWrite              =   1'b1; ////
-                    
+
                     ALUSrcA             =   2'b01; ////
                     ALUSrcB             =   3'b010; ////
                     ALU                 =   3'b001; ////

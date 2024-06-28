@@ -1144,9 +1144,9 @@ always @(posedge clk) begin
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
                     LoadSizeCtrl         =   2'b10; ////
-                    RegDst                 =   2'b00; ////
-                    RegSrc                 =   3'b010; ////
-                    RegWrite               =   1'b1; ////
+                    RegDst               =   2'b00; ////
+                    RegSrc               =   3'b100; ////
+                    RegWrite             =   1'b1; ////
 
                     //next state
                     states = state_Fetch;
@@ -1183,9 +1183,9 @@ always @(posedge clk) begin
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
                     LoadSizeCtrl         =   2'b01; ////
-                    RegDst                 =   2'b00; ////
-                    RegSrc                 =   3'b010; ////
-                    RegWrite               =   1'b1; ////
+                    RegDst               =   2'b00; ////
+                    RegSrc               =   3'b100; ////
+                    RegWrite             =   1'b1; ////
 
                     //next state
                     states = state_Fetch;
@@ -1235,9 +1235,9 @@ always @(posedge clk) begin
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
                     LoadSizeCtrl         =   2'b00; ////
-                    RegDst                 =   2'b00; ////
-                    RegSrc                 =   3'b010; ////
-                    RegWrite               =   1'b1; ////
+                    RegDst               =   2'b00; ////
+                    RegSrc               =   3'b100; ////
+                    RegWrite             =   1'b1; ////
 
                     //next state
                     states = state_Fetch;

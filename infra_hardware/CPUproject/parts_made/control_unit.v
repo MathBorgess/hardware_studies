@@ -207,6 +207,7 @@ always @(posedge clk) begin
         EPC_Load            =   1'b0;
         MDR_Load            =   1'b0;
         IRWrite             =   1'b0;
+        RegWrite            =   1'b0;
         writeHL             =   1'b0;
         A_Load              =   1'b0;
         B_Load              =   1'b0;

@@ -235,207 +235,212 @@ always @(posedge clk) begin
 
             //DECODE
             state_Decode: begin
-                ALUSrcA             =   2'b00;
-                ALUSrcB             =   2'b11;
-                ALU                 =   3'b001;
-                ALUOut_Load         =   1'b1;
-                A_Load              =   1'b1;
-                B_Load              =   1'b1;
-                //next state
-                counter = 5'b00000;
-                case (OPCODE) //Analisando OPCODE da operacao atual para definir o proximo estado
-                    //OP Tipo R
-                    Op_Type_r: begin
-                        case (Funct) //Analisando campo Funct do tipo R
-                            //Funct ADD
-                            Funct_Add: begin
-                                states = state_Add;
-                            end
+                if(counter == 5'b00000) begin
+                    counter = counter + 5'b00001;
+                end else if (counter == 5'b00001) begin
+                    ALUSrcA             =   2'b00;
+                    ALUSrcB             =   2'b11;
+                    ALU                 =   3'b001;
+                    ALUOut_Load         =   1'b1;
+                    A_Load              =   1'b1;
+                    B_Load              =   1'b1;
+                    //next state
+                    counter = 5'b00000;
+                    case (OPCODE) //Analisando OPCODE da operacao atual para definir o proximo estado
+                        //OP Tipo R
+                        Op_Type_r: begin
+                            case (Funct) //Analisando campo Funct do tipo R
+                                //Funct ADD
+                                Funct_Add: begin
+                                    states = state_Add;
+                                end
 
-                            //Funct AND
-                            Funct_And: begin
-                                states = state_And;
-                            end
+                                //Funct AND
+                                Funct_And: begin
+                                    states = state_And;
+                                end
 
-                            //Funct DIV
-                            Funct_Div: begin
-                                states = state_Div;
-                            end
+                                //Funct DIV
+                                Funct_Div: begin
+                                    states = state_Div;
+                                end
 
-                            //Funct MULT
-                            Funct_Mult: begin
-                                states = state_Mult;
-                            end
+                                //Funct MULT
+                                Funct_Mult: begin
+                                    states = state_Mult;
+                                end
 
-                            //Funct JR
-                            Funct_Jr: begin
-                                states = state_Jr;
-                            end
+                                //Funct JR
+                                Funct_Jr: begin
+                                    states = state_Jr;
+                                end
 
-                            //Funct MFHI
-                            Funct_Mfhi: begin
-                                states = state_Mfhi;
-                            end
+                                //Funct MFHI
+                                Funct_Mfhi: begin
+                                    states = state_Mfhi;
+                                end
 
-                            //Funct MFLO
-                            Funct_Mflo: begin
-                                states = state_Mflo;
-                            end
+                                //Funct MFLO
+                                Funct_Mflo: begin
+                                    states = state_Mflo;
+                                end
 
-                            //Funct SLL
-                            Funct_Sll: begin
-                                states = state_Sll;
-                            end
-                            
-                            //Funct SLLV
-                            Funct_Sllv: begin
-                                states = state_Sllv;
-                            end
+                                //Funct SLL
+                                Funct_Sll: begin
+                                    states = state_Sll;
+                                end
+                                
+                                //Funct SLLV
+                                Funct_Sllv: begin
+                                    states = state_Sllv;
+                                end
 
-                            //Funct SLT
-                            Funct_Slt: begin
-                                states = state_Slt;
-                            end
+                                //Funct SLT
+                                Funct_Slt: begin
+                                    states = state_Slt;
+                                end
 
-                            //Funct SRA
-                            Funct_Sra: begin
-                                states = state_Sra;
-                            end
+                                //Funct SRA
+                                Funct_Sra: begin
+                                    states = state_Sra;
+                                end
 
-                            //Funct SRAV
-                            Funct_Srav: begin
-                                states = state_Srav;
-                            end
+                                //Funct SRAV
+                                Funct_Srav: begin
+                                    states = state_Srav;
+                                end
 
-                            //Funct SRL
-                            Funct_Srl: begin
-                                states = state_Srl;
-                            end
+                                //Funct SRL
+                                Funct_Srl: begin
+                                    states = state_Srl;
+                                end
 
-                            //Funct SUB
-                            Funct_Sub: begin
-                                states = state_Sub;
-                            end
+                                //Funct SUB
+                                Funct_Sub: begin
+                                    states = state_Sub;
+                                end
 
-                            //Funct BREAK
-                            Funct_Break: begin
-                                states = state_Break;
-                            end
+                                //Funct BREAK
+                                Funct_Break: begin
+                                    states = state_Break;
+                                end
 
-                            //Funct RTE
-                            Funct_RTE: begin
-                                states = state_RTE;
-                            end
+                                //Funct RTE
+                                Funct_RTE: begin
+                                    states = state_RTE;
+                                end
 
-                            //Funct Xchg
-                            Funct_Xchg: begin
-                                states = state_Xchg;
-                            end
+                                //Funct Xchg
+                                Funct_Xchg: begin
+                                    states = state_Xchg;
+                                end
 
-                            //Funct OR
-                            Funct_Or: begin
-                                states = state_Or;
-                            end
+                                //Funct OR
+                                Funct_Or: begin
+                                    states = state_Or;
+                                end
 
-                            //Funct XCHG
-                            Funct_Xchg: begin
-                                states = state_Xchg;
-                            end
+                                //Funct XCHG
+                                Funct_Xchg: begin
+                                    states = state_Xchg;
+                                end
 
-                            default: //erro de opcode
-                                states = state_Opcode404;
+                                default: //erro de opcode
+                                    states = state_Opcode404;
+                            endcase
+                        end
+
+                        //Op ADDI
+                        Op_Addi: begin
+                            states = state_Addi;
+                        end
+
+                        //Op ADDIU
+                        Op_Addiu: begin
+                            states = state_Addiu;
+                        end
+
+                        //Op BEQ
+                        Op_Beq: begin
+                            states = state_Beq;
+                        end
+
+                        //Op BNE
+                        Op_Bne: begin
+                            states = state_Bne;
+                        end
+
+                        //Op BLE
+                        Op_Ble: begin
+                            states = state_Ble;
+                        end
+
+                        //Op BGT
+                        Op_Bgt: begin
+                            states = state_Bgt;
+                        end
+
+                        //Op Divm
+                        Op_Divm: begin
+                            states = state_Divm;
+                        end
+
+                        //Op LB
+                        Op_Lb: begin
+                            states = state_Lb;
+                        end
+
+                        //Op LH
+                        Op_Lh: begin
+                            states = state_Lh;
+                        end
+
+                        //Op LUI
+                        Op_Lui: begin
+                            states = state_Lui;
+                        end
+
+                        //Op LW
+                        Op_Lw: begin
+                            states = state_Lw;
+                        end
+
+                        //Op SB
+                        Op_Sb: begin
+                            states = state_Sb;
+                        end
+
+                        //Op SH
+                        Op_Sh: begin
+                            states = state_Sh;
+                        end
+
+                        //Op SLTI
+                        Op_Slti: begin
+                            states = state_Slti;
+                        end
+
+                        //Op SW
+                        Op_Sw: begin
+                            states = state_Sw;
+                        end
+
+                        //Op J
+                        Op_J: begin
+                            states = state_J;
+                        end
+
+                        //Op JAL
+                        Op_Jal: begin
+                            states = state_Jal;
+                        end
+
+                        default:
+                            states = state_Opcode404;
                         endcase
                     end
-
-                    //Op ADDI
-                    Op_Addi: begin
-                        states = state_Addi;
-                    end
-
-                    //Op ADDIU
-                    Op_Addiu: begin
-                        states = state_Addiu;
-                    end
-
-                    //Op BEQ
-                    Op_Beq: begin
-                        states = state_Beq;
-                    end
-
-                    //Op BNE
-                    Op_Bne: begin
-                        states = state_Bne;
-                    end
-
-                    //Op BLE
-                    Op_Ble: begin
-                        states = state_Ble;
-                    end
-
-                    //Op BGT
-                    Op_Bgt: begin
-                        states = state_Bgt;
-                    end
-
-                    //Op Divm
-                    Op_Divm: begin
-                        states = state_Divm;
-                    end
-
-                    //Op LB
-                    Op_Lb: begin
-                        states = state_Lb;
-                    end
-
-                    //Op LH
-                    Op_Lh: begin
-                        states = state_Lh;
-                    end
-
-                    //Op LUI
-                    Op_Lui: begin
-                        states = state_Lui;
-                    end
-
-                    //Op LW
-                    Op_Lw: begin
-                        states = state_Lw;
-                    end
-
-                    //Op SB
-                    Op_Sb: begin
-                        states = state_Sb;
-                    end
-
-                    //Op SH
-                    Op_Sh: begin
-                        states = state_Sh;
-                    end
-
-                    //Op SLTI
-                    Op_Slti: begin
-                        states = state_Slti;
-                    end
-
-                    //Op SW
-                    Op_Sw: begin
-                        states = state_Sw;
-                    end
-
-                    //Op J
-                    Op_J: begin
-                        states = state_J;
-                    end
-
-                    //Op JAL
-                    Op_Jal: begin
-                        states = state_Jal;
-                    end
-
-                    default:
-                        states = state_Opcode404;
-                    endcase
                 end
+
 
             //OVERFLOW
             state_Overflow: begin

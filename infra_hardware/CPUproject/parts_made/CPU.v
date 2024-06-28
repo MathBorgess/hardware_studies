@@ -418,7 +418,7 @@ module CPU (
 
     Concat_JumpPC the_box_(
         Shift_Left26_28_Out,
-        PC_Out[31:28],
+        PC_Out,
         The_Box_Out
     );
 

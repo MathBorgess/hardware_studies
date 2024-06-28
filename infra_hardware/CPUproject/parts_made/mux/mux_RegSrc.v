@@ -9,8 +9,7 @@ module mux_RegSrc (
     input wire [31:0] data_7,
     output reg [31:0] data_out
 );
-
-    always @(sel) begin
+    always @(*) begin
         case (sel)
             3'd0: data_out = 32'd227;
             3'd1: data_out = data_1;

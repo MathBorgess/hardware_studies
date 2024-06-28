@@ -4,7 +4,7 @@ module mux_Shift_Src (
     input wire  [31:0] data_1, // vem do B 
     output reg [31:0] data_out
 );
-    always @(sel) begin
+    always @(*) begin
         case (sel)
             1'd0: data_out = data_0;
             1'd1: data_out = data_1;

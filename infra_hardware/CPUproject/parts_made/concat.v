@@ -9,8 +9,8 @@ endmodule
 
 module Concat_JumpPC (
     input  [27:0] data_in_SL_2628_out,
-    input  [3:0] data_in_PC, // PC_out[31:28]
+    input  [31:0] data_in_PC, // PC_out[31:28]
     output [31:0] data_out
 );
-    assign data_out = {data_in_PC, data_in_SL_2628_out}; // SL_2628_out -> data_out_offset<<2 & fill with zeros 
+    assign data_out = {data_in_PC[31:28], data_in_SL_2628_out}; // SL_2628_out -> data_out_offset<<2 & fill with zeros 
 endmodule

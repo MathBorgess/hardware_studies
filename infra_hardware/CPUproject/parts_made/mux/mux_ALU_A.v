@@ -6,7 +6,7 @@ module mux_ALU_A (
     output reg [31:0] data_out
 );
     wire [31:0] notA = ~data_1;
-    always @(sel) begin
+    always @(*) begin
         case (sel)
             2'd0: data_out = data_0;
             2'd1: data_out = data_1;

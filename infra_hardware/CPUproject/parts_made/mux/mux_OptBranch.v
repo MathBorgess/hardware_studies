@@ -4,7 +4,7 @@ module mux_opt_branch (
     output reg data_out
 
 );
-    always @(sel) begin
+    always @(*) begin
         case (sel)
             1'd0: data_out = data_0;
             1'd1: data_out = ~data_0;

@@ -37,6 +37,7 @@ module div (
 			divRun = 0; divZero = 1;
 		end
         else if(divCtrl) begin
+            divZero = 1;
             if(srcB == 32'b0) begin
                 divZero = 0;
             end 

@@ -92,7 +92,7 @@ parameter state_Sub         =       6'b010011;
 parameter state_Break       =       6'b010100;
 parameter state_RTE         =       6'b010101;
 parameter state_Or          =       6'b010110;
-parameter state_Xchg        =       6'b101000;
+parameter state_Xchg        =       6'b111111;
 
 parameter state_Addi        =       6'b010111;
 parameter state_Addiu       =       6'b011000;

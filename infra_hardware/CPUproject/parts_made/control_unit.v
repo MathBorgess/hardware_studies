@@ -914,7 +914,6 @@ always @(posedge clk) begin
                     AddressCtrl         =   3'b101; ////
                     ALUOutSrc           =   3'b000; ////
                     ALUOut_Load         =   1'b1; ////
-                    MDR_Load            =   1'b1; ////
 
                     //next state
                     states = state_Xchg;
@@ -936,6 +935,7 @@ always @(posedge clk) begin
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b01000 || counter == 5'b01001) begin
                     AddressCtrl         =   3'b101; ////
+                    StoreSizeCtrl       =   2'b11; ////
                     MemWR               =   1'b1; ////
                     WriteMemoSrc        =   1'b0; ////
 

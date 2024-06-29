@@ -67,8 +67,7 @@ module CPU (
 
     //Control ULA Useless
     wire            NEGATIVE;
-    wire            EQUAL;
-    wire            LESS;
+    wire            ZERO;
 
     //Control Wires Flags
     wire[1:0]       Store_Size_selector;
@@ -82,8 +81,9 @@ module CPU (
     wire            PCWrite;
     wire            PCWriteCond;
     wire            GT;
-    wire            ZERO;
+    wire            EQUAL;
     wire            OVERFLOW;
+    wire            LESS;
 
     //Control Wires (Mult)
     wire            MultInit;

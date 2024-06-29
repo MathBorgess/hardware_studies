@@ -1324,26 +1324,16 @@ always @(posedge clk) begin
 
             //SLTI
             state_Slti: begin
-                if (counter == 5'b00000) begin
-                    ALUSrcA            =   2'b01; ////
-                    ALUSrcB            =   3'b010; ////
-                    ALU                =   3'b111; ////
+                ALUSrcA             =   2'b01; ////
+                ALUSrcB             =   3'b010; ////
+                ALU                 =   3'b111; ////
+                RegDst              =   2'b00; ////
+                RegSrc              =   3'b001; ////
+                RegWrite            =   1'b1; ////
 
-                    //next state
-                    states = state_Slti;
-                    counter = counter + 5'b00001;
-                end else if (counter == 5'b00001) begin
-                    ALUSrcA             =   2'b01; ////
-                    ALUSrcB             =   3'b010; ////
-                    ALU                 =   3'b111; ////
-                    RegDst              =   2'b00; ////
-                    RegSrc              =   3'b001; ////
-                    RegWrite            =   1'b1; ////
-
-                    //next state
-                    states = state_Fetch;
-                    counter = 5'b00000;
-                end
+                //next state
+                states = state_Fetch;
+                counter = 5'b00000;
             end
 
             //SW

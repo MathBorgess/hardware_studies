@@ -628,21 +628,21 @@ always @(posedge clk) begin
 
             state_MultDivRun: begin
                 if (DivInit || MultInit) begin
-                    if (DivInit && !DivZero) begin
-                        states = state_Div0;
-                        DivInit = 1'b0;
-                    end else begin
-                        states = state_MultDivRun;
-                        DivInit = 1'b0;
-                        MultInit = 1'b0;
-                    end
+                    states = state_MultDivRun;
+                    DivInit = 1'b0;
+                    MultInit = 1'b0;
                 end else if (counter == 5'b11111) begin
                     writeHL = 1'b1;
                     states = state_Fetch;
                     counter = 5'b00000;
                 end else begin
-                    states = state_MultDivRun;
-                    counter = counter + 5'b00001;
+                    if (!DivZero) begin
+                        states = state_Div0;
+                        DivInit = 1'b0;
+                    end else begin
+                        states = state_MultDivRun;
+                        counter = counter + 5'b00001;
+                    end
                 end
             end
 

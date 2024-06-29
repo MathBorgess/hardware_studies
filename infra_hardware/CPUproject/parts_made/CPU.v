@@ -149,7 +149,7 @@ module CPU (
     mux_opt_flag mux_OptFlag_(
         Flag_selector,
         GT,
-        ZERO,
+        EQUAL,
         mux_OptFlag_Out
     );
 

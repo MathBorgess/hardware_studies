@@ -62,6 +62,7 @@ module div (
                     quotient = {quotient[29:0],1'b1};  
                 end
                 cycleCount <= cycleCount+1'b1;
+                currDigit = currDigit-1'b1;
             end
         end
         

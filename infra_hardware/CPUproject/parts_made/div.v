@@ -78,8 +78,8 @@ module div (
             cycleCount <= cycleCount+1'b1;
             if(cycleCount==5'b11111) begin  // stop div
                 divRun=0;
-                hi = signalQuot && (remainder != 0) ? (denominator - remainder) : remainder;
-                lo = signalQuot ? ~(quotient+ (remainder != 0 ? 1 : 0)) + 1 : quotient;
+                hi = signalA ? ~remainder + 1 : remainder;
+                lo = signalQuot ? ~quotient + 1 : quotient;
             end
             else begin //-1
                 currDigit = currDigit-1'b1;

@@ -11,7 +11,7 @@
 `include "../parts_made/mux/mux_ALU_A.v"
 `include "../parts_made/mux/mux_ALU_B.v"
 `include "../parts_made/mux/mux_ALUOut.v"
-`include "../parts_made/mux/mux_divSrcA.v"
+`include "../parts_made/mux/mux_divSrc.v"
 `include "../parts_made/mux/mux_hi&lo.v"
 `include "../parts_made/mux/mux_MemAddr.v"
 `include "../parts_made/mux/mux_MemWD.v"
@@ -113,6 +113,7 @@ module CPU (
     wire [31:0]     mux_High_Out;
     wire [31:0]     mux_Low_Out;
     wire [31:0]     mux_divA_Out;
+    wire [31:0]     mux_divB_Out;
     wire [31:0]     mux_ShiftSrc_Out;
     wire [4:0]      mux_ShiftN_Out;
     wire [31:0]     mux_ALU1_Out; 
@@ -331,16 +332,23 @@ module CPU (
         Mult_Low_Out
     );
 
-    mux_divSrcA mux_divSrcA_(
+    mux_divSrc mux_divSrcA_(
         mux_DivOp_selector,
         A_Out,
-        MDR_Out,
+        B_Out,
         mux_divA_Out
+    );
+
+    mux_divSrc mux_divSrcB_(
+        mux_DivOp_selector,
+        B_Out,
+        MDR_Out,
+        mux_divB_Out
     );
 
     div div_(
         mux_divA_Out,
-        B_Out,
+        mux_divB_Out,
         clk,
         reset,
         DivInit,

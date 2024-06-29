@@ -1,4 +1,4 @@
-module mux_divSrcA (
+module mux_divSrc (
     input wire sel,
     input wire [31:0] data_0, // from A
     input wire [31:0] data_1, // from MDR

@@ -21,7 +21,6 @@ module mult (
 
 
     always @ (posedge clk) begin
-        $display("%d", result);
         case(multCtrl)
 			1'b1: begin
                 signalA = srcA[31];

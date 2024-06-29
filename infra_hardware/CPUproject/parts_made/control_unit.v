@@ -790,7 +790,7 @@ always @(posedge clk) begin
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00010) begin
                     RegDst              =   2'b11; ////
-                    RegSrc              =   3'b101; ////
+                    RegSrc              =   3'b010; ////
                     Shift               =   3'b000; ////
                     RegWrite            =   1'b1; ////
 

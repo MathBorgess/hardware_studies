@@ -926,7 +926,7 @@ always @(posedge clk) begin
                     //next state
                     states = state_Xchg;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00101) begin
+                end else if (counter == 5'b00110) begin
                     AddressCtrl         =   3'b110; ////
                     MemWR               =   1'b1; ////
                     WriteMemoSrc        =   1'b1; ////
@@ -934,7 +934,7 @@ always @(posedge clk) begin
                     //next state
                     states = state_Xchg;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00110) begin
+                end else if (counter == 5'b00111) begin
                     AddressCtrl         =   3'b101; ////
                     MemWR               =   1'b1; ////
                     WriteMemoSrc        =   1'b0; ////

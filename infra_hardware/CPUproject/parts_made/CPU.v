@@ -445,14 +445,14 @@ module CPU (
         mux_ALU_Out_selector,
         Memory_Out,
         ALU_Result,
-        mux_ALUOut_Out
+        mux_ALUOut_Out 
     );
 
     Registrador ALUOut_(
         clk,
         reset,
         ALUOut_Load,
-        ALU_Result,
+        mux_ALUOut_Out, 
         ALUOut_Out
     );
 

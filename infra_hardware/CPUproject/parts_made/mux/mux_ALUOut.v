@@ -4,12 +4,11 @@ module mux_ALUOUT (
     input wire [31:0] data_1,
     output reg [31:0] data_out
 );
-    wire [31:0] notValue = ~data_1;
     always @(*) begin
         case (sel)
             2'd0: data_out = data_0;
             2'd1: data_out = data_1;
-            2'd2: data_out = notValue;
+            2'd2: data_out = ~data_1;
         endcase 
     end 
 

@@ -1338,6 +1338,9 @@ always @(posedge clk) begin
                     states = state_Slti;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
+                    ALUSrcA             =   2'b01; ////
+                    ALUSrcB             =   3'b010; ////
+                    ALU                 =   3'b111; ////
                     RegDst              =   2'b00; ////
                     RegSrc              =   3'b001; ////
                     RegWrite            =   1'b1; ////

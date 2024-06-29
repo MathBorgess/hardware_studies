@@ -453,18 +453,12 @@ always @(posedge clk) begin
                     ALUSrcA             =   2'b00; ////
                     ALUSrcB             =   3'b001; ////
                     ALU                 =   3'b010; ////
+                    EPC_Load            =   1'b1; ////
 
                     //next state
                     states = state_Overflow;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00011) begin
-                    EPC_Load            =   1'b1; ////
-                    MDR_Load            =   1'b1; ////
-
-                    //next state
-                    states = state_Overflow;
-                    counter = counter + 5'b00001;
-                end else if (counter == 5'b00100) begin
                     ALUSrcA            =   2'b11; ////
                     PCSource           =   2'b00; ////
                     ALU                =   3'b000; ////
@@ -483,18 +477,12 @@ always @(posedge clk) begin
                     ALUSrcA             =   2'b00; ////
                     ALUSrcB             =   3'b001; ////
                     ALU                 =   3'b010; ////
+                    EPC_Load            =   1'b1; ////
 
                     //next state
                     states = state_Opcode404;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00011) begin
-                    EPC_Load            =   1'b1; ////
-                    MDR_Load            =   1'b1; ////
-
-                    //next state
-                    states = state_Opcode404;
-                    counter = counter + 5'b00001;
-                end else if (counter == 5'b00100) begin
                     ALUSrcA            =   2'b11; ////
                     PCSource           =   2'b00; ////
                     ALU                =   3'b000; ////
@@ -513,18 +501,12 @@ always @(posedge clk) begin
                     ALUSrcA             =   2'b00; ////
                     ALUSrcB             =   3'b001; ////
                     ALU                 =   3'b010; ////
+                    EPC_Load            =   1'b1; ////
 
                     //next state
                     states = state_Div0;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00011) begin
-                    EPC_Load            =   1'b1; ////
-                    MDR_Load            =   1'b1; ////
-
-                    //next state
-                    states = state_Div0;
-                    counter = counter + 5'b00001;
-                end else if (counter == 5'b00100) begin
                     ALUSrcA            =   2'b11; ////
                     PCSource           =   2'b00; ////
                     ALU                =   3'b000; ////
@@ -616,13 +598,8 @@ always @(posedge clk) begin
                 DivOp               =   1'b0; ///
 
                 // DivZero = 0 -> Error detection
-                if (!DivZero) begin
-                    DivInit             =   1'b0;
-                    states              =   state_Div0;
-                end else begin
-                    counter             =   5'b00000; ////
-                    states              =   state_MultDivRun;
-                end
+                counter             =   5'b00000; ////
+                states              =   state_MultDivRun;
             end
 
             state_MultDivRun: begin

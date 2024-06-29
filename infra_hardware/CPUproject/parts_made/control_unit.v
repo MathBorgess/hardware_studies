@@ -448,17 +448,23 @@ always @(posedge clk) begin
 
             //OVERFLOW
             state_Overflow: begin
-                if (counter == 5'b00000 || counter == 5'b00001) begin
-                    AddressCtrl         =   3'b011; //// 254
+                if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
+                    AddressCtrl         =   3'b011; ////
                     ALUSrcA             =   2'b00; ////
                     ALUSrcB             =   3'b001; ////
                     ALU                 =   3'b010; ////
-                    EPC_Load            =   1'b1; ////
 
                     //next state
                     states = state_Overflow;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00010) begin
+                end else if (counter == 5'b00011) begin
+                    EPC_Load            =   1'b1; ////
+                    MDR_Load            =   1'b1; ////
+
+                    //next state
+                    states = state_Overflow;
+                    counter = counter + 5'b00001;
+                end else if (counter == 5'b00100) begin
                     ALUSrcA            =   2'b11; ////
                     PCSource           =   2'b00; ////
                     ALU                =   3'b000; ////
@@ -472,8 +478,8 @@ always @(posedge clk) begin
 
             //OPCODE INEXISTENTE
             state_Opcode404: begin
-                if (counter == 5'b00000 || counter == 5'b00001) begin
-                    AddressCtrl         =   3'b010; //// 253
+                if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
+                    AddressCtrl         =   3'b010; ////
                     ALUSrcA             =   2'b00; ////
                     ALUSrcB             =   3'b001; ////
                     ALU                 =   3'b010; ////
@@ -481,7 +487,14 @@ always @(posedge clk) begin
                     //next state
                     states = state_Opcode404;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00010) begin
+                end else if (counter == 5'b00011) begin
+                    EPC_Load            =   1'b1; ////
+                    MDR_Load            =   1'b1; ////
+
+                    //next state
+                    states = state_Opcode404;
+                    counter = counter + 5'b00001;
+                end else if (counter == 5'b00100) begin
                     ALUSrcA            =   2'b11; ////
                     PCSource           =   2'b00; ////
                     ALU                =   3'b000; ////
@@ -495,17 +508,23 @@ always @(posedge clk) begin
 
             //DIVISAO POR 0
             state_Div0: begin
-                if (counter == 5'b00000 || counter == 5'b00001) begin
-                    AddressCtrl         =   3'b100; //// 255
+                if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
+                    AddressCtrl         =   3'b100; ////
                     ALUSrcA             =   2'b00; ////
                     ALUSrcB             =   3'b001; ////
                     ALU                 =   3'b010; ////
-                    EPC_Load            =   1'b1; ////
-                    
+
                     //next state
                     states = state_Div0;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00010) begin
+                end else if (counter == 5'b00011) begin
+                    EPC_Load            =   1'b1; ////
+                    MDR_Load            =   1'b1; ////
+
+                    //next state
+                    states = state_Div0;
+                    counter = counter + 5'b00001;
+                end else if (counter == 5'b00100) begin
                     ALUSrcA            =   2'b11; ////
                     PCSource           =   2'b00; ////
                     ALU                =   3'b000; ////
@@ -514,7 +533,7 @@ always @(posedge clk) begin
                     //next state
                     states = state_Fetch;
                     counter = 5'b00000;
-                end 
+                end
             end
             
             //ADD

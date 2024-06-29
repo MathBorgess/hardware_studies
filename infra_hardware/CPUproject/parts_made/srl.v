@@ -2,7 +2,7 @@ module ShiftRightLogical_24times (
     input  [31:0] data_in,
     output [31:0] data_out
 );
-    assign data_out = {24'b0, data_in[31:24]};
+    assign data_out = {24'b0, data_in[7:0]};
 endmodule
 
 module ShiftRightLogical_1to32 (

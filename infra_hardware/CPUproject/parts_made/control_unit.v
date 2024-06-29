@@ -918,29 +918,24 @@ always @(posedge clk) begin
                 if (counter == 5'b00000 || counter == 5'b00001 || counter == 5'b00010) begin
                     AddressCtrl         =   3'b101; ////
                     ALUOutSrc           =   3'b000; ////
+                    ALUOut_Load         =   1'b1; ////
+                    MDR_Load            =   1'b1; ////
 
                     //next state
                     states = state_Xchg;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00011) begin
-                    ALUOut_Load         =   1'b1; ////
-                    MDR_Load            =   1'b1; ////
+                end else if () begin
                     //Erro de overflow so deve ser analisado apos o calculo
                     states = state_Xchg;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00100 || counter == 5'b00101 || counter == 5'b00101) begin
+                end else if (counter == 5'b00011 || counter == 5'b00100 || counter == 5'b00101) begin
                     AddressCtrl         =   3'b110; ////
-
-                    //next state
-                    states = state_Xchg;
-                    counter = counter + 5'b00001;
-                end else if (counter == 5'b00111) begin
                     MDR_Load            =   1'b1; ////
 
                     //next state
                     states = state_Xchg;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b01000) begin
+                end else if (counter == 5'b00101) begin
                     AddressCtrl         =   3'b110; ////
                     MemWR               =   1'b1; ////
                     WriteMemoSrc        =   1'b1; ////
@@ -948,7 +943,7 @@ always @(posedge clk) begin
                     //next state
                     states = state_Xchg;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b01010) begin
+                end else if (counter == 5'b00110) begin
                     AddressCtrl         =   3'b101; ////
                     MemWR               =   1'b1; ////
                     WriteMemoSrc        =   1'b0; ////

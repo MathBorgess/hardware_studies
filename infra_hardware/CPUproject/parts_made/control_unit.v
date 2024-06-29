@@ -712,13 +712,13 @@ always @(posedge clk) begin
                     //next state
                     states = state_Sll;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00001 || counter == 5'b00010) begin
+                end else if (counter == 5'b00001) begin
                     Shift               =   3'b010; ////
 
                     //next state
                     states = state_Sll;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00011) begin
+                end else if (counter == 5'b00010) begin
                     Shift               =   3'b000; ////
                     RegDst              =   2'b11; ////
                     RegSrc              =   3'b010; ////
@@ -740,13 +740,13 @@ always @(posedge clk) begin
                     //next state
                     states = state_Sllv;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00001 || counter == 5'b00010) begin
+                end else if (counter == 5'b00001) begin
                     Shift            =   3'b010; ////
 
                     //next state
                     states = state_Sllv;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00011) begin
+                end else if (counter == 5'b00010) begin
                     Shift            =   3'b000; ////
                     RegDst           =   2'b11; ////
                     RegSrc           =   3'b010; ////
@@ -782,13 +782,13 @@ always @(posedge clk) begin
                     //next state
                     states = state_Sra;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00001 || counter ==  5'b00010) begin
+                end else if (counter == 5'b00001) begin
                     Shift               =   3'b100; ////
 
                     //next state
                     states = state_Sra;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00011) begin
+                end else if (counter == 5'b00010) begin
                     RegDst              =   2'b11; ////
                     RegSrc              =   3'b101; ////
                     Shift               =   3'b000; ////
@@ -810,7 +810,7 @@ always @(posedge clk) begin
                     //next state
                     states = state_Srav;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00001 || counter == 5'b00010) begin
+                end else if (counter == 5'b00001) begin
                     Shift               =   3'b100; ////
 
                     //next state

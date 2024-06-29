@@ -8,3 +8,4 @@ infra_hardware/CPUproject/Projeto CPU infhw.cr.mti
 infra_hardware/CPUproject/vsim.wlf
 infra_hardware/CPUproject/waveInstTest.do
 infra_hardware/CPUproject/vsim_stacktrace.vstf
+infra_hardware/CPUproject/vish_stacktrace.vstf

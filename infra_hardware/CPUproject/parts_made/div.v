@@ -54,7 +54,8 @@ module div (
                 hi=32'b0; lo=32'b0;
             end
         end
-        else if(!divCtrl & divRun) begin 
+        
+        if(!divCtrl & divRun) begin 
             remainder = {remainder[29:0],numerator[currDigit]};
             if(denominator>remainder) begin
                 quotient = {quotient[29:0], 1'b0};

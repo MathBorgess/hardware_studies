@@ -53,7 +53,7 @@ module CPU (
     wire[1:0]       mux_PC_selector;
     wire[1:0]       mux_WR_Registers_selector;
     wire[2:0]       mux_WD_Registers_selector;
-    wire            mux_divSrcA_selector;
+    wire            mux_DivOp_selector;
 
     //Control Wires Single Register 
     wire            EPC_Load;
@@ -91,7 +91,6 @@ module CPU (
     //Control Wires (Div)
     wire            DivInit;
     wire            DivZero;
-    wire            DivOp;
 
     //Data Wires (Registradores)
     wire [31:0]     PC_Out;
@@ -333,9 +332,9 @@ module CPU (
     );
 
     mux_divSrcA mux_divSrcA_(
-        DivOp,
-        MDR_Out,
+        mux_DivOp_selector,
         A_Out,
+        MDR_Out,
         mux_divA_Out
     );
 
@@ -474,7 +473,7 @@ module CPU (
         DivZero,
 
         mux_MemWD_selector,
-        mux_divSrcA_selector,
+        mux_DivOp_selector,
         mux_high_low_selector,
         mux_ALU_Out_selector,
         mux_ShiftSrc_selector,

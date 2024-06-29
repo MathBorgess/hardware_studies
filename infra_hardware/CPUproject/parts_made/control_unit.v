@@ -187,7 +187,8 @@ always @(posedge clk) begin
         BranchOption        =   1'b0;
         MultInit            =   1'b0;
         DivInit             =   1'b0;
-
+        DivOp               =   1'b0;
+        
         //next state
         states = state_Fetch;
         counter = 5'b00000;
@@ -209,6 +210,7 @@ always @(posedge clk) begin
         IRWrite             =   1'b0;
         RegWrite            =   1'b0;
         writeHL             =   1'b0;
+        DivOp               =   1'b0;
         A_Load              =   1'b0;
         B_Load              =   1'b0;
         
@@ -617,6 +619,7 @@ always @(posedge clk) begin
                 writeHL             =   1'b0; ////
                 HLSrc               =   1'b0; ////
                 DivInit             =   1'b1; ////
+                DivOp               =   1'b0; ///
 
                 // DivZero = 0 -> Error detection
                 if (!DivZero) begin

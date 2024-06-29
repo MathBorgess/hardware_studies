@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-`include "div.v"
+`include "parts_made/div.v"
 
 module divider_tb;
    parameter n_bits = 32;

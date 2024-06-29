@@ -722,7 +722,7 @@ always @(posedge clk) begin
                     Shift               =   3'b000; ////
                     RegDst              =   2'b11; ////
                     RegSrc              =   3'b010; ////
-                    RegWrite            =   1'b0; ////
+                    RegWrite            =   1'b1; ////
 
                     //next state
                     states = state_Fetch;
@@ -747,10 +747,10 @@ always @(posedge clk) begin
                     states = state_Sllv;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00011) begin
-                    Shift               =   3'b000; ////
+                    Shift            =   3'b000; ////
                     RegDst           =   2'b11; ////
                     RegSrc           =   3'b010; ////
-                    RegWrite         =   1'b0; ////
+                    RegWrite         =   1'b1; ////
 
                     //next state
                     states = state_Fetch;
@@ -792,6 +792,7 @@ always @(posedge clk) begin
                     RegDst              =   2'b11; ////
                     RegSrc              =   3'b101; ////
                     Shift               =   3'b000; ////
+                    RegWrite            =   1'b1; ////
 
                     //next state
                     states = state_Fetch;

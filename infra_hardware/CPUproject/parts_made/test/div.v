@@ -59,8 +59,8 @@ module divider_tb;
 		#(100*n_bits)
         $display("hi = %b, lo = %b, a_in = %b, b_in = %b", hi, lo, a_in, b_in);
         #200
-		a_in = 'd190 ;
-		b_in = 'd13 ;
+		a_in = 'd1 ;
+		b_in = 'd1 ;
 		start = 1;
 		#100
 		start = 0;

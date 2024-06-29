@@ -340,11 +340,6 @@ always @(posedge clk) begin
                                     states = state_RTE;
                                 end
 
-                                //Funct Xchg
-                                Funct_Xchg: begin
-                                    states = state_Xchg;
-                                end
-
                                 //Funct OR
                                 Funct_Or: begin
                                     states = state_Or;
@@ -922,10 +917,6 @@ always @(posedge clk) begin
                     MDR_Load            =   1'b1; ////
 
                     //next state
-                    states = state_Xchg;
-                    counter = counter + 5'b00001;
-                end else if () begin
-                    //Erro de overflow so deve ser analisado apos o calculo
                     states = state_Xchg;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00011 || counter == 5'b00100 || counter == 5'b00101) begin

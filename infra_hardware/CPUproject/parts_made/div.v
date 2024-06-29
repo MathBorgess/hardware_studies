@@ -52,6 +52,16 @@ module div (
                 currDigit = 5'd31; cycleCount = 5'd0;
 
                 hi=32'b0; lo=32'b0;
+                
+                remainder = {remainder[29:0],numerator[currDigit]};
+                if(denominator>remainder) begin
+                    quotient = {quotient[29:0], 1'b0};
+                end
+                else begin
+                    remainder = remainder - denominator;
+                    quotient = {quotient[29:0],1'b1};  
+                end
+                cycleCount <= cycleCount+1'b1;
             end
         end
         

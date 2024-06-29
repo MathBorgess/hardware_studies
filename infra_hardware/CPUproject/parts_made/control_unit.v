@@ -465,7 +465,7 @@ always @(posedge clk) begin
                     //next state
                     states = state_Overflow;
                     counter = counter + 5'b00001;
-                end else if (counter == 5'b00011) begin
+                end else if (counter == 5'b00010) begin
                     ALUSrcA            =   2'b11; ////
                     PCSource           =   2'b00; ////
                     ALU                =   3'b000; ////

@@ -940,6 +940,9 @@ always @(posedge clk) begin
                     WriteMemoSrc        =   1'b0; ////
 
                     //next state
+                    states = state_Xchg;
+                    counter = counter + 5'b00001;
+                end else if (counter == 5'b01010) begin
                     states = state_Fetch;
                     counter = 5'b00000;
                 end

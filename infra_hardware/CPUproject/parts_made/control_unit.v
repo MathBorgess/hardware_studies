@@ -188,7 +188,7 @@ always @(posedge clk) begin
         MultInit            =   1'b0;
         DivInit             =   1'b0;
         DivOp               =   1'b0;
-        
+
         //next state
         states = state_Fetch;
         counter = 5'b00000;
@@ -1100,8 +1100,8 @@ always @(posedge clk) begin
                     MDR_Load            =   1'b1; ////
 
                     //next state
-                    states = state_Div;
-                    counter = 5'b00000;
+                    states = state_Divm;
+                    counter = counter + 5'b00001;
                 end else if (counter == 5'b00101) begin
                     writeHL             =   1'b0; ////
                     HLSrc               =   1'b0; ////

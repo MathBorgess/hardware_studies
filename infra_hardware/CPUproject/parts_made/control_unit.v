@@ -859,11 +859,16 @@ always @(posedge clk) begin
                     ALUSrcA            =   2'b00; ////
                     ALUSrcB            =   3'b001; ////
                     ALU                =   3'b010; ////
+                    PCSource            =   2'b10; ////
+                    PCWrite             =   1'b1; ////
 
                     //next state
                     states = state_Break;
                     counter = counter + 5'b00001;
                 end else if (counter == 5'b00001) begin
+                    ALUSrcA            =   2'b00; ////
+                    ALUSrcB            =   3'b001; ////
+                    ALU                =   3'b010; ////
                     PCSource            =   2'b10; ////
                     PCWrite             =   1'b1; ////
                     

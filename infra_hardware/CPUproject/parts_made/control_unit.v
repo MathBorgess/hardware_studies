@@ -597,7 +597,6 @@ always @(posedge clk) begin
                 DivInit             =   1'b1; ////
                 DivOp               =   1'b0; ///
 
-                // DivZero = 0 -> Error detection
                 counter             =   5'b00000; ////
                 states              =   state_MultDivRun;
             end

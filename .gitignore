@@ -9,3 +9,4 @@ infra_hardware/CPUproject/vsim.wlf
 infra_hardware/CPUproject/vsim_stacktrace.vstf
 Testbench 2024.1/
 infra_hardware/CPUproject/vish_stacktrace.vstf
+infra_hardware/CPUproject/projeto_cpu_infhw.cr.mti

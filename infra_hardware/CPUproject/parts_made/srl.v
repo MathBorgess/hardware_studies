@@ -1,4 +1,4 @@
-module ShiftRightLogical_24times (
+module LSByte_reader (
     input  [31:0] data_in,
     output [31:0] data_out
 );

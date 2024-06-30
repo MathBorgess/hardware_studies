@@ -102,7 +102,7 @@ module CPU (
     wire [31:0]     A_Out;
     wire [31:0]     B_Out;
     wire [31:0]     ALUOut_Out;
-    wire [31:0]     srl24_Out; 
+    wire [31:0]     LSByte_reader_out; 
 
     //Data Wires (Mux)
     wire [31:0]     mux_PC_Out;
@@ -402,16 +402,16 @@ module CPU (
         Shift_Left26_28_Out
     );
 
-    ShiftRightLogical_24times srl24(
+    LSByte_reader lsbyte_reader(
         Memory_Out,
-        srl24_Out
+        LSByte_reader_out
     );
 
     mux_ALU_A mux_ALU1_(
         mux_ALU_A_selector,
         PC_Out,
         A_Out,
-        srl24_Out,
+        LSByte_reader_out,
         mux_ALU1_Out
     );
 
